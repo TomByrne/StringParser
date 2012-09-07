@@ -1,0 +1,3 @@
+::foreach i config.allTypes::
+* [::i.nameDots::](::i.name::)
+::end::

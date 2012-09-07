@@ -1,0 +1,10 @@
+<project name="composure-hx" url="http://github.com/TomByrne/composure-hx" license="GPL">
+    <user name="tbyrne"/>
+    <tag v="cross"/>
+    <tag v="utility"/>
+    <tag v="parsing"/>
+    <description><![CDATA[A library for parsing large strings efficiently.<br/>Has facilities for bracket matching.<br/>Operations are completely granular, meaning parsing can be paused at any time.]]></description>
+    <version name="0.1"><![CDATA[Initial port from AS3.]]></version>
+
+    <depends name="msignal"/>
+</project>
