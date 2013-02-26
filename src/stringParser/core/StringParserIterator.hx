@@ -57,17 +57,17 @@ class StringParserIterator
 	/**
 	 * In seconds
 	 */
-	public var executionTime(default, setExecutionTime):Float;
+	@:isVar public var executionTime(default, setExecutionTime):Float;
 	private function setExecutionTime(value:Float):Float{
 		this.executionTime = value;
 		//_executionTimeMilli = Std.int(value * 1000 + 0.5);
 		return value;
 	}
 
-	public var phase1CurrStep(default, null):Int;
-	public var phase2CurrStep(default, null):Int;
-	public var phase1Steps(default, null):Int;
-	public var phase2Steps(default, null):Int;
+	@:isVar public var phase1CurrStep(default, null):Int;
+	@:isVar public var phase2CurrStep(default, null):Int;
+	@:isVar public var phase1Steps(default, null):Int;
+	@:isVar public var phase2Steps(default, null):Int;
 
 	public var stringParser(getStringParser, null):StringParser;
 		private function getStringParser():StringParser{

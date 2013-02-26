@@ -10,37 +10,37 @@ import stringParser.parsers.NameValuePairParser;
 
 class XmlInterpretter extends AbstractInterpretter
 {
-	public static var xmlConfig(get_xmlConfig, null):Array<ICharacterParser>;
+	public static var xmlConfig(get, null):Array<ICharacterParser>;
 	private static function get_xmlConfig():Array<ICharacterParser>{
 		checkInit();
 		return _xmlConfig;
 	}
 	
-	public static var declarationParser(get_declarationParser, null):BracketPairParser;
+	public static var declarationParser(get, null):BracketPairParser;
 	private static function get_declarationParser():BracketPairParser{
 		checkInit();
 		return declarationParser;
 	}
 	
-	public static var nodeParser(get_nodeParser, null):MarkupTagParser;
+	public static var nodeParser(get, null):MarkupTagParser;
 	private static function get_nodeParser():MarkupTagParser{
 		checkInit();
 		return nodeParser;
 	}
 	
-	public static var commentParser(get_commentParser, null):BracketPairParser;
+	public static var commentParser(get, null):BracketPairParser;
 	private static function get_commentParser():BracketPairParser{
 		checkInit();
 		return commentParser;
 	}
 	
-	public static var attPairParser(get_attPairParser, null):NameValuePairParser;
+	public static var attPairParser(get, null):NameValuePairParser;
 	private static function get_attPairParser():NameValuePairParser{
 		checkInit();
 		return attPairParser;
 	}
 	
-	public static var attNameParser(get_attNameParser, null):NameValuePairParser;
+	public static var attNameParser(get, null):NameValuePairParser;
 	private static function get_attNameParser():NameValuePairParser{
 		checkInit();
 		return attNameParser;

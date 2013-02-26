@@ -3,7 +3,7 @@ import stringParser.core.ILookahead;
 
 class WhitespaceParser extends AbstractCharacterParser
 {
-	public static var instance(get_instance, null):WhitespaceParser;
+	public static var instance(get, null):WhitespaceParser;
 	private static function get_instance():WhitespaceParser{
 		if(instance==null){
 			instance = new WhitespaceParser();
@@ -15,7 +15,7 @@ class WhitespaceParser extends AbstractCharacterParser
 
 
 
-	public var characters(default, setCharacters):Array<String>;
+	@:isVar public var characters(default, setCharacters):Array<String>;
 	private function setCharacters(value:Array<String>):Array<String>{
 		if(this.characters!=value){
 			this.characters = value;

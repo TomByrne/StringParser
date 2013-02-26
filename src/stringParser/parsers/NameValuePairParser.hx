@@ -9,7 +9,7 @@ class NameValuePairParser extends AbstractCharacterParser
 	private static inline var PROGRESS:String = "progress";
 
 
-	public var nameParser(default, set_nameParser):ICharacterParser;
+	@:isVar public var nameParser(default, set):ICharacterParser;
 	private function set_nameParser(value:ICharacterParser):ICharacterParser{
 		if(this.nameParser!=value){
 			this.nameParser = value;
@@ -18,7 +18,7 @@ class NameValuePairParser extends AbstractCharacterParser
 		return value;
 	}
 
-	public var valueParsers(default, set_valueParsers):Array<ICharacterParser>;
+	@:isVar public var valueParsers(default, set):Array<ICharacterParser>;
 	private function set_valueParsers(value:Array<ICharacterParser>):Array<ICharacterParser>{
 		if(this.valueParsers!=value){
 			this.valueParsers = value;
@@ -31,7 +31,7 @@ class NameValuePairParser extends AbstractCharacterParser
 		return value;
 	}
 
-	public var nameFirst(default, set_nameFirst):Bool;
+	@:isVar public var nameFirst(default, set):Bool;
 	private function set_nameFirst(value:Bool):Bool{
 		if(this.nameFirst!=value){
 			this.nameFirst = value;

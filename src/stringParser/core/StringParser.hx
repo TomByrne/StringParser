@@ -5,7 +5,7 @@ import stringParser.parsers.WhitespaceParser;
 
 class StringParser implements ILookahead
 {
-	public var inputString(default, set_inputString):String;
+	@:isVar public var inputString(default, set):String;
 	private function set_inputString(value:String):String{
 		if(this.inputString!=value){
 			reset();
@@ -15,7 +15,7 @@ class StringParser implements ILookahead
 		return value;
 	}
 
-	public var config(default, set_config):Array<ICharacterParser>;
+	@:isVar public var config(default, set):Array<ICharacterParser>;
 	private function set_config(value:Array<ICharacterParser>):Array<ICharacterParser>{
 		if(this.config!=value){
 			reset();
@@ -25,7 +25,7 @@ class StringParser implements ILookahead
 		return value;
 	}
 
-	public var trimWhitespace(default, set_trimWhitespace):Bool;
+	@:isVar public var trimWhitespace(default, set):Bool;
 	private function set_trimWhitespace(value:Bool):Bool{
 		if(this.trimWhitespace!=value){
 			reset();
@@ -39,8 +39,8 @@ class StringParser implements ILookahead
 	}
 
 
-	public var totalSteps(default, null):Int;
-	public var progress(default, null):Int;
+	@:isVar public var totalSteps(default, null):Int;
+	@:isVar public var progress(default, null):Int;
 
 
 	public var firstPacketId(getFirstPacketId, null):String;

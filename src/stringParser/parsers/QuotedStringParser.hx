@@ -15,7 +15,7 @@ class QuotedStringParser extends AbstractCharacterParser
 	private static inline var LAST_CHAR:String = "lastChar";
 	private static inline var OPENED_QUOTE:String = "openedQuote";
 
-	public var quoteTypes(default, set_quoteTypes):Array<String>;
+	@:isVar public var quoteTypes(default, set):Array<String>;
 	private function set_quoteTypes(value:Array<String>):Array<String>{
 		if(this.quoteTypes!=value){
 			this.quoteTypes = value;

@@ -12,28 +12,28 @@ import stringParser.parsers.QuotedStringParser;
 
 class JsonInterpretter extends AbstractInterpretter
 {
-	public static var jsonConfig(get_jsonConfig, null):Array<ICharacterParser>;
+	public static var jsonConfig(get, null):Array<ICharacterParser>;
 	private static function get_jsonConfig():Array<ICharacterParser>{
 		checkInit();
 		return _jsonConfig;
 	}
 	
-	public static var objectParser(get_objectParser, null):BracketPairParser;
+	public static var objectParser(get, null):BracketPairParser;
 	private static function get_objectParser():BracketPairParser{
 		checkInit();
 		return objectParser;
 	}
-	public static var arrayParser(get_arrayParser, null):BracketPairParser;
+	public static var arrayParser(get, null):BracketPairParser;
 	private static function get_arrayParser():BracketPairParser{
 		checkInit();
 		return arrayParser;
 	}
-	public static var stringParser(get_stringParser, null):QuotedStringParser;
+	public static var stringParser(get, null):QuotedStringParser;
 	private static function get_stringParser():QuotedStringParser{
 		checkInit();
 		return stringParser;
 	}
-	public static var nameValueParser(get_nameValueParser, null):NameValuePairParser;
+	public static var nameValueParser(get, null):NameValuePairParser;
 	private static function get_nameValueParser():NameValuePairParser{
 		checkInit();
 		return nameValueParser;

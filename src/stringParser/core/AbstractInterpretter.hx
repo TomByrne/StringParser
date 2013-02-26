@@ -14,7 +14,7 @@ class AbstractInterpretter implements IInterpretter
 		return _iterator;
 	}
 
-	public var inputString(get_inputString, set_inputString):String;
+	public var inputString(get, set):String;
 	private function get_inputString():String{
 		return _stringParser.inputString;
 	}

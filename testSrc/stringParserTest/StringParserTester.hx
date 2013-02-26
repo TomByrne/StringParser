@@ -5,7 +5,7 @@ import stringParser.core.StringParserIterator;
 class StringParserTester
 {
 
-	public var running(default, set_running):Bool;
+	@:isVar public var running(default, set):Bool;
 	private function set_running(value:Bool):Bool{
 		if(this.running!=value){
 			this.running = value;
