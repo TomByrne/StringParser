@@ -63,7 +63,7 @@ class ObjectsEqual
 			}
 		}else{
 			var fields1 = Reflect.fields(value1);
-			var checked:Hash<Bool> = new Hash();
+			var checked:Map<String, Bool> = new Map();
 			
 			for (field in fields1) {
 				checked.set(field, true);

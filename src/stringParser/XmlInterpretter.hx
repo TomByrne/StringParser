@@ -70,12 +70,12 @@ class XmlInterpretter extends AbstractInterpretter
 	private var _nameValueMode:Bool;
 	private var _nextPropName:String;
 
-	private var _objectMap:Hash<Dynamic>;
+	private var _objectMap:Map<String, Dynamic>;
 
 
 	public function new(inputString:String=null){
 		super(inputString);
-		_objectMap = new Hash();
+		_objectMap = new Map();
 	}
 	override private function getParserConfig():Array<ICharacterParser>{
 		return xmlConfig;

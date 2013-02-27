@@ -56,13 +56,13 @@ class StringParser implements ILookahead
 
 	private var _firstPacketId:String;
 	private var _totalPackets:Int = -1;
-	private var _strings:Hash<String>;
-	private var _stringArrays:Hash<Array<String>>;
-	private var _parents:Hash<String>;
-	private var _firstChild:Hash<String>;
-	private var _lastChild:Hash<String>;
-	private var _nextSibling:Hash<String>;
-	private var _parsers:Hash<ICharacterParser>;
+	private var _strings:Map<String, String>;
+	private var _stringArrays:Map<String, Array<String>>;
+	private var _parents:Map<String, String>;
+	private var _firstChild:Map<String, String>;
+	private var _lastChild:Map<String, String>;
+	private var _nextSibling:Map<String, String>;
+	private var _parsers:Map<String, ICharacterParser>;
 
 	private var _currentId:String;
 	private var _currentParser:ICharacterParser;
@@ -121,13 +121,13 @@ class StringParser implements ILookahead
 			//_openParsers = new Vector();
 			_openParserIds = [];
 			_currentOptions = this.config;
-			_strings = new Hash();
-			_stringArrays = new Hash();
-			_parsers = new Hash();
-			_parents = new Hash();
-			_firstChild = new Hash();
-			_lastChild = new Hash();
-			_nextSibling = new Hash();
+			_strings = new Map();
+			_stringArrays = new Map();
+			_parsers = new Map();
+			_parents = new Map();
+			_firstChild = new Map();
+			_lastChild = new Map();
+			_nextSibling = new Map();
 		}
 	}
 

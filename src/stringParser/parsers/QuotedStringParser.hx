@@ -20,7 +20,7 @@ class QuotedStringParser extends AbstractCharacterParser
 		if(this.quoteTypes!=value){
 			this.quoteTypes = value;
 			if(this.quoteTypes!=null){
-				_quoteLookup = new Hash();
+				_quoteLookup = new Map();
 				for(char in this.quoteTypes){
 					_quoteLookup.set(char, true);
 				}
@@ -31,7 +31,7 @@ class QuotedStringParser extends AbstractCharacterParser
 		return value;
 	}
 
-	private var _quoteLookup:Hash<Bool>;
+	private var _quoteLookup:Map<String, Bool>;
 
 	public var escapeChar:String;
 

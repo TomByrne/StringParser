@@ -20,7 +20,7 @@ class WhitespaceParser extends AbstractCharacterParser
 		if(this.characters!=value){
 			this.characters = value;
 			if(this.characters!=null){
-				_charLookup = new Hash();
+				_charLookup = new Map();
 				for(char in this.characters){
 					_charLookup.set(char, true);
 				}
@@ -31,7 +31,7 @@ class WhitespaceParser extends AbstractCharacterParser
 		return value;
 	}
 
-	private var _charLookup:Hash<Bool>;
+	private var _charLookup:Map<String, Bool>;
 
 	public function new(?characters:Array<String>) {
 		super();
