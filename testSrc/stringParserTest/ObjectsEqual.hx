@@ -28,12 +28,12 @@ class ObjectsEqual
 				return value1 == value2;
 			case TFunction:
 				return value1 == value2;
-			case TEnum( e ):
+			case TEnum( _ ):
 				return Type.enumEq(value1, value2);
 			case TObject:
 				return objEqual(value1, value2);
 			case TClass( c ):
-				if (c == String || c == Int || c == Float) {
+				if (c == String) {
 					return value1 == value2;
 				}else{
 					return objEqual(value1, value2);

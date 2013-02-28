@@ -1,8 +1,5 @@
 package stringParser.parsers;
 import stringParser.core.ILookahead;
-import haxe.ds.ObjectMap;
-
-
 
 
 
@@ -10,7 +7,7 @@ class AbstractCharacterParser implements ICharacterParser
 {
 	private var _selfVector:Array<ICharacterParser>;
 
-	private var _varStorage:Map<String, ObjectMap<Dynamic>>;
+	private var _varStorage:Map<String, Map<String, Dynamic>>;
 
 	public function new(){
 		
@@ -38,7 +35,7 @@ class AbstractCharacterParser implements ICharacterParser
 		}
 		var storage:Map<String, Dynamic> = _varStorage.get(name);
 		if(storage==null){
-			storage = new Map();
+			storage = new Map<String, Dynamic>();
 			_varStorage.set(name, storage);
 		}
 		storage.set(packetId, value);

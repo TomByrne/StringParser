@@ -43,12 +43,12 @@ class StringParser implements ILookahead
 	@:isVar public var progress(default, null):Int;
 
 
-	public var firstPacketId(getFirstPacketId, null):String;
-		private function getFirstPacketId():String{
+	public var firstPacketId(get, null):String;
+	private function get_firstPacketId():String{
 		return _firstPacketId;
 	}
-	public var totalPackets(getTotalPackets, null):Int;
-		private function getTotalPackets():Int{
+	public var totalPackets(get, null):Int;
+		private function get_totalPackets():Int{
 		return _totalPackets;
 	}
 

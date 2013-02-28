@@ -7,7 +7,7 @@ import stringParser.core.ILookahead;
 
 class QuotedStringParser extends AbstractCharacterParser
 {
-	public static inline var QUOTE_TYPES:Array<String> = ["'",'"'];
+	public static var QUOTE_TYPES:Array<String> = ["'",'"'];
 	public static inline var ESCAPE_CHAR:String = "\\";
 
 	private static inline var OPEN:String = "open";

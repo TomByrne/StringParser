@@ -69,7 +69,7 @@ class JsonInterpretter extends AbstractInterpretter
 
 	public function new(inputString:String=null){
 		super(inputString);
-		_objectMap = new Map();
+		_objectMap = new Map<String, Dynamic>();
 	}
 	override private function getParserConfig():Array<ICharacterParser>{
 		return jsonConfig;

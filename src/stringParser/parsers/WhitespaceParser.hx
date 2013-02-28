@@ -11,12 +11,12 @@ class WhitespaceParser extends AbstractCharacterParser
 		return instance;
 	}
 
-	public static inline var WHITESPACE_CHARS:Array<String> = [" ","\n","\r","\t"];
+	public static var WHITESPACE_CHARS:Array<String> = [" ","\n","\r","\t"];
 
 
 
-	@:isVar public var characters(default, setCharacters):Array<String>;
-	private function setCharacters(value:Array<String>):Array<String>{
+	@:isVar public var characters(default, set):Array<String>;
+	private function set_characters(value:Array<String>):Array<String>{
 		if(this.characters!=value){
 			this.characters = value;
 			if(this.characters!=null){
