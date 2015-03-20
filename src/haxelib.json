@@ -1,0 +1,12 @@
+{
+  "name": "composure",
+  "url": "http://github.com/TomByrne/StringParser",
+  "license": "MIT",
+  "tags": ["cross","utility","parsing"],
+  "description": "A library for parsing large strings efficiently.<br/>Has facilities for bracket matching.<br/>Operations are completely granular, meaning parsing can be paused at any time.",
+  "version": "1.0.0",
+  "releasenote": "Initial port from AS3.<br/>JSON only supported at The moment.",
+  "contributors": ["tbyrne"],
+  "dependencies": {
+  }
+}
