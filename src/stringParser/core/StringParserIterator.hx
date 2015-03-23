@@ -78,6 +78,8 @@ class StringParserIterator
 
 	private var _stringParser:StringParser;
 	private var _func:String->String->ICharacterParser->Dynamic->Void;
+	private var _start:Null<Void->Void>;
+	private var _finish:Null<Void->Void>;
 	//private var _additionalParams:Array<Dynamic>;
 	//private var _params:Array<Dynamic>;
 
@@ -87,9 +89,11 @@ class StringParserIterator
 
 	private var _asyncCompleteHandler:Void->Void;
 
-	public function new(stringParser:StringParser, func:String->String->ICharacterParser->Dynamic->Void/*, ?additionalParams:Array<Dynamic>*/){
+	public function new(stringParser:StringParser, func:String->String->ICharacterParser->Dynamic->Void, ?start:Void->Void, ?finish:Void->Void/*, ?additionalParams:Array<Dynamic>*/){
 		_stringParser = stringParser;
 		_func = func;
+		_start = start;
+		_finish = finish;
 		//_additionalParams = additionalParams;
 		
 		//_params = [null,null,null];
@@ -109,6 +113,8 @@ class StringParserIterator
 		if(_state>0){
 			throw "iteration has already begun";
 		}
+		
+		if (_start != null)_start();
 		
 		// Phase 1
 		phase1Steps = _stringParser.totalSteps;
@@ -139,7 +145,7 @@ class StringParserIterator
 			++i;
 		}
 		phase2CurrStep = _stringParser.totalPackets;
-		
+		if (_finish != null) _finish();
 		_state = 3;
 	}
 
@@ -148,6 +154,8 @@ class StringParserIterator
 			throw "iteration has already begun";
 		}
 		_asyncCompleteHandler = onComplete;
+		
+		if (_start != null)_start();
 		
 		// Phase 1
 		phase1Steps = _stringParser.totalSteps;
@@ -206,6 +214,7 @@ class StringParserIterator
 			++phase2CurrStep;
 			if(_stringParser.totalPackets==phase2CurrStep){
 				removeAsycHandler(doPhase2LoopDef);
+				if (_finish != null) _finish();
 				_asyncCompleteHandler();
 			}
 		}

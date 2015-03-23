@@ -1,10 +1,6 @@
 package stringParser.parsers;
 import stringParser.core.ILookahead;
 
-/**
- * ...
- * @author Tom Byrne
- */
 
 class MarkupTagParser  extends AbstractCharacterParser
 {
@@ -129,6 +125,10 @@ class MarkupTagParser  extends AbstractCharacterParser
 
 	override public function parseCharacter(char:String, packetId:String, lookahead:ILookahead):Bool{
 		return false;
+	}
+	
+	override private function getChildParsers():Null<Array<ICharacterParser>> {
+		return childParsers;
 	}
 }
 private enum State{

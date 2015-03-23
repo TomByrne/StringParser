@@ -31,7 +31,7 @@ class AbstractInterpretter implements IInterpretter
 
 	public function new(inputString:String){
 		_stringParser = new StringParser(null,getParserConfig());
-		_iterator = new StringParserIterator(_stringParser,interpret);
+		_iterator = new StringParserIterator(_stringParser,interpret,start,finish);
 		this.inputString = inputString;
 	}
 	
@@ -44,7 +44,17 @@ class AbstractInterpretter implements IInterpretter
 	}
 
 
+	private function start():Void{
+		
+	}
+
+
 	private function interpret(id:String, parentId:String, parser:ICharacterParser, strings:Dynamic):Void{
+		
+	}
+
+
+	private function finish():Void{
 		
 	}
 }

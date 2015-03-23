@@ -1,6 +1,8 @@
 package stringParserTest;
 
 import flash.display.Sprite;
+import stringParser.test.FileStringParserTester;
+import stringParser.test.ObjectsEqual;
 import stringParser.XmlInterpretter;
 
 import stringParser.JsonInterpretter;
@@ -18,11 +20,11 @@ class TestBed extends Sprite
 		super();
 		
 		var tester:FileStringParserTester = new FileStringParserTester("JSON", new JsonInterpretter());
-		tester.addTest("testJs/test1.js", testJs, false);
+		tester.addTestFile("testJs/test1.js", testJs, false);
 		tester.running = true;
 		
 		tester = new FileStringParserTester("XML", new XmlInterpretter());
-		tester.addTest("testXml/test1.xml", testXml, false);
+		tester.addTestFile("testXml/test1.xml", testXml, false);
 		tester.running = true;
 	}
 	

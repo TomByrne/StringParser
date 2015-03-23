@@ -8,6 +8,7 @@ class AbstractCharacterParser implements ICharacterParser
 	private var _selfVector:Array<ICharacterParser>;
 
 	private var _varStorage:Map<String, Map<String, Dynamic>>;
+	private var _isResetting:Bool;
 
 	public function new(){
 		
@@ -47,5 +48,22 @@ class AbstractCharacterParser implements ICharacterParser
 			return _varStorage.get(name).get(packetId);
 		}
 		
+	}
+	
+	public function reset():Void {
+		if (_isResetting) return;
+		_isResetting = true;
+		_varStorage = null;
+		var childParsers = getChildParsers();
+		if(childParsers!=null){
+			for (parser in childParsers) {
+				parser.reset();
+			}
+		}
+		_isResetting = false;
+	}
+	
+	private function getChildParsers():Null<Array<ICharacterParser>> {
+		return null;	
 	}
 }

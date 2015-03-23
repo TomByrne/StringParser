@@ -1,4 +1,4 @@
-package stringParserTest;
+package stringParser.test;
 import stringParser.core.IInterpretter;
 import stringParser.core.StringParserIterator;
 

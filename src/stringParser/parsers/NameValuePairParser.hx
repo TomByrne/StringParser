@@ -50,6 +50,7 @@ class NameValuePairParser extends AbstractCharacterParser
 
 	private var _firstParserVector:Array<ICharacterParser>;
 	private var _lastParserVector:Array<ICharacterParser>;
+	private var _allParsers:Array<ICharacterParser>;
 
 	public var seperator:String;
 
@@ -105,6 +106,13 @@ class NameValuePairParser extends AbstractCharacterParser
 
 	override public function parseCharacter(char:String, packetId:String, lookahead:ILookahead):Bool{
 		return false;
+	}
+	
+	override private function getChildParsers():Null<Array<ICharacterParser>> {
+		if (_allParsers == null) {
+			_allParsers = _firstParserVector.concat(_lastParserVector);
+		}
+		return _allParsers;
 	}
 }
 private enum State {

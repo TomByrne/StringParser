@@ -43,10 +43,10 @@ class JsonInterpretter extends AbstractInterpretter
 		if(_jsonConfig==null){
 			_jsonConfig = [];
 			
-			objectParser = new BracketPairParser("{","}",null,",");
+			objectParser = new BracketPairParser("{","}",null,[","]);
 			_jsonConfig.push(objectParser);
 			
-			arrayParser = new BracketPairParser("[","]",null,",");
+			arrayParser = new BracketPairParser("[","]",null,[","]);
 			_jsonConfig.push(arrayParser);
 			
 			stringParser = new QuotedStringParser();

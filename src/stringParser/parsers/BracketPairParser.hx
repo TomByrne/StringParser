@@ -17,14 +17,14 @@ class BracketPairParser extends AbstractCharacterParser
 	public var openBracket:String;
 	public var closeBracket:String;
 	public var escapeChar:String;
-	public var childSeperator:String;
+	public var childSeperators:Array<String>;
 
-	public function new(openBracket:String = null, closeBracket:String = null, escapeChar:String = null, childSeperator:String = null) {
+	public function new(openBracket:String = null, closeBracket:String = null, escapeChar:String = null, childSeperators:Array<String> = null) {
 		super();
 		this.openBracket = openBracket;
 		this.closeBracket = closeBracket;
 		this.escapeChar = escapeChar;
-		this.childSeperator = childSeperator;
+		this.childSeperators = childSeperators;
 	}
 
 	override public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead):Array<ICharacterParser>{
@@ -58,13 +58,19 @@ class BracketPairParser extends AbstractCharacterParser
 						}
 					}
 				case Children:
+					ret = childParsers;
 					if(!doEscape){
 						if (matchToken(char, lookahead, closeBracket)) {
 							newState = Closing;
 							ret = _selfVector;
 						}
-						if(matchToken(char, lookahead, childSeperator)){
-							ret = _selfVector;
+						if (childSeperators != null) {
+							for(childSeperator in childSeperators){
+								if(matchToken(char, lookahead, childSeperator)){
+									ret = _selfVector;
+									break;
+								}
+							}
 						}
 					}
 				case Closing:
@@ -91,6 +97,10 @@ class BracketPairParser extends AbstractCharacterParser
 		if (childParsers != null) return false;
 		
 		return getVar(packetId, STATE)==Children;
+	}
+	
+	override private function getChildParsers():Null<Array<ICharacterParser>> {
+		return childParsers;
 	}
 }
 private enum State {

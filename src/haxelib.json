@@ -1,5 +1,5 @@
 {
-  "name": "composure",
+  "name": "stringParser",
   "url": "http://github.com/TomByrne/StringParser",
   "license": "MIT",
   "tags": ["cross","utility","parsing"],

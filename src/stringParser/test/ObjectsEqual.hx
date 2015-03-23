@@ -1,9 +1,4 @@
-package stringParserTest;
-
-/**
- * ...
- * @author Tom Byrne
- */
+package stringParser.test;
 
 class ObjectsEqual 
 {
@@ -12,7 +7,7 @@ class ObjectsEqual
 	{
 		var type = Type.typeof(value1);
 		var type2 = Type.typeof(value2);
-		if (!Type.enumEq(type, type2)) {
+		if (!enumEqual(type, type2)) {
 			return false;
 		}
 		
@@ -29,7 +24,7 @@ class ObjectsEqual
 			case TFunction:
 				return value1 == value2;
 			case TEnum( _ ):
-				return Type.enumEq(value1, value2);
+				return enumEqual(cast value1, cast value2);
 			case TObject:
 				return objEqual(value1, value2);
 			case TClass( c ):
@@ -41,6 +36,24 @@ class ObjectsEqual
 			case TUnknown:
 				return false;
 		}
+	}
+	// Type.enumEq doesn't match identical arrays
+	public static function enumEqual(enum1:EnumValue, enum2:EnumValue):Bool
+	{
+		if (Type.enumIndex(enum1) != Type.enumIndex(enum2)) {
+			return false;
+		}
+		var params1 = Type.enumParameters(enum1);
+		var params2 = Type.enumParameters(enum2);
+		if (params1.length != params2.length) {
+			return false;
+		}
+		for (i in 0...params1.length) {
+			if (!equal(params1[i], params2[i])) {
+				return false;
+			}
+		}
+		return true;
 	}
 	public static function objEqual(value1:Dynamic, value2:Dynamic):Bool
 	{

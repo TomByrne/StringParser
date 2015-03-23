@@ -48,13 +48,14 @@ class StringParser implements ILookahead
 		return _firstPacketId;
 	}
 	public var totalPackets(get, null):Int;
-		private function get_totalPackets():Int{
+	private function get_totalPackets():Int{
 		return _totalPackets;
 	}
 
 	private var _idsAtIndex:Int = -1;
 
 	private var _firstPacketId:String;
+	private var _lastRootPacketId:String;
 	private var _totalPackets:Int = -1;
 	private var _strings:Map<String, String>;
 	private var _stringArrays:Map<String, Array<String>>;
@@ -94,10 +95,12 @@ class StringParser implements ILookahead
 		if(this.inputString!=null && this.config!=null){
 			progress = -1;
 			totalSteps = -1;
+			_finishedOnCurrent = false;
 			_startCurrentString = -1;
 			_currentId = null;
 			_totalPackets = -1;
 			_firstPacketId = null;
+			_lastRootPacketId = null;
 			_idsAtIndex = -1;
 			
 			//_openParsers = null;
@@ -108,6 +111,13 @@ class StringParser implements ILookahead
 			_firstChild = null;
 			_lastChild = null;
 			_nextSibling = null;
+			
+			_currentOptions = null;
+			_currentParser = null;
+			
+			for (parser in config) {
+				parser.reset();
+			}
 		}
 	}
 	private function init():Void{
@@ -133,66 +143,74 @@ class StringParser implements ILookahead
 
 	public function parseStep():Void{
 		var char:String = this.inputString.charAt(progress);
-		var newParserId:String;
+		var newPacketId:String;
 		var newParser:ICharacterParser;
 		
 		if((_currentParser==null || _finishedOnCurrent) && skipWhitespsace(char)){
 			// ignore
 		}else{
 			//var nextId:String = getNextId();
-			if(_currentParser==null){
-				newParserId = findCurrentParser(char,null,_currentOptions);
-				newParser = _getParser(newParserId);
-				if(newParser==null){
-					throw "No initial parser found";
+			if (_currentParser == null) {
+				if (_currentOptions == null){
+					_currentOptions = this.config;
 				}
-				_firstPacketId = newParserId;
-				setCurrentParser(newParser,newParserId);
+				newPacketId = findCurrentParser(char, null, _currentOptions, _finishedOnCurrent);
+				newParser = _getParser(newPacketId);
+				if(newParser==null){
+					throw "No parser found for character at: "+progress;
+				}
+				if(_firstPacketId==null){
+					_firstPacketId = newPacketId;
+				}else {
+					_nextSibling.set(_lastRootPacketId, newPacketId);
+				}
+				_lastRootPacketId = newPacketId;
+				setCurrentParser(newParser,newPacketId);
 				_finishedOnCurrent = false;
 			}else{
-				if((newParserId = testParser(char,_currentParser,_currentId,_getParent(_currentId),true))!=null){
-					newParser = _getParser(newParserId);
-					if(newParser!=_currentParser){
+				if((newPacketId = testParser(char,_currentParser,_currentId,_getParent(_currentId),true, _finishedOnCurrent))!=null){
+					newParser = _getParser(newPacketId);
+					if(newParser!=_currentParser || _finishedOnCurrent){
 						//nextId = getNextId();
-						setCurrentParser(newParser,newParserId);
+						setCurrentParser(newParser,newPacketId);
 						_finishedOnCurrent = false;
 					}
 				}else if(!skipWhitespsace(char)){
-				storeCurrentString();
-				var firstTry:Bool = true;
-				
-				var oldCurrId:String = _currentId;
-				
-				var i:Int=0;
-				while(i<_openParserIds.length && (_finishedOnCurrent || firstTry)){
-					firstTry = false;
+					storeCurrentString();
+					var firstTry:Bool = true;
 					
-					var parentId:String = _openParserIds[_openParserIds.length-1-i];
-					var parentParser:ICharacterParser = _getParser(parentId);
-					newParserId = testParser(char,parentParser,parentId,_getParent(parentId),true);
+					var oldCurrId:String = _currentId;
 					
-					if(newParserId!=null){
-						newParser = _getParser(newParserId);
+					var i:Int=0;
+					while(i<_openParserIds.length && (_finishedOnCurrent || firstTry)){
+						firstTry = false;
 						
-						//_openParsers.splice(_openParsers.length-1-i,i+1);
-						_openParserIds.splice(_openParserIds.length-1-i,i+1);
+						var parentId:String = _openParserIds[_openParserIds.length-1-i];
+						var parentParser:ICharacterParser = _getParser(parentId);
+						newPacketId = testParser(char,parentParser,parentId,_getParent(parentId),true, true);
 						
-						if(newParser==parentParser){
-							_currentId = parentId;
-							_currentParser = newParser;
+						if(newPacketId!=null){
+							newParser = _getParser(newPacketId);
+							
+							//_openParsers.splice(_openParsers.length-1-i,i+1);
+							_openParserIds.splice(_openParserIds.length-1-i,i+1);
+							
+							if(newParser==parentParser){
+								_currentId = parentId;
+								_currentParser = newParser;
+							}else{
+								setCurrentParser(newParser,newPacketId);
+								addToList(newPacketId,parentId);
+							}
+							_finishedOnCurrent = false;
+							break;
 						}else{
-							setCurrentParser(newParser,newParserId);
-							addToList(newParserId,parentId);
+							_finishedOnCurrent = true;
 						}
-						_finishedOnCurrent = false;
-						break;
-					}else{
-						_finishedOnCurrent = true;
+						++i;
 					}
-					++i;
-				}
 				}else{
-				_finishedOnCurrent = true;
+					_finishedOnCurrent = true;
 				}
 			}
 			if(_currentParser!=null && !_finishedOnCurrent){
@@ -208,6 +226,9 @@ class StringParser implements ILookahead
 		
 		++progress;
 		_idsAtIndex = 0;
+		if (_currentParser!=null && progress == totalSteps) {
+			storeCurrentString();
+		}
 	}
 
 	private function getNextId():String{
@@ -224,6 +245,8 @@ class StringParser implements ILookahead
 	private function addToList(id:String, parentId:String):Void{
 		if(parentId!=null){
 			var lastChild:Dynamic = _getLastChild(parentId);
+			if (lastChild == id) return;
+			
 			if(lastChild==null){
 				_firstChild.set(parentId, id);
 			}else{
@@ -255,15 +278,15 @@ class StringParser implements ILookahead
 		}
 	}
 
-	private function findCurrentParser(char:String, parentId:String, inParsers:Array<ICharacterParser>):String{
+	private function findCurrentParser(char:String, parentId:String, inParsers:Array<ICharacterParser>, parserFinished:Bool):String{
 		var nextId:String = getNextId();
 		var childId:String;
 		for(parser in inParsers){
-			if((childId = testParser(char,parser,nextId,parentId,false))!=null){
+			if((childId = testParser(char,parser,nextId,parentId,false,parserFinished))!=null){
 				if(childId==nextId){
-					if(parentId!=_currentId){
+					/*if(parentId!=null && parentId!=_currentId){
 						addToList(parentId,_getParent(parentId));
-					}
+					}*/
 					_parents.set(childId, parentId);
 					addToList(childId,parentId);
 				}
@@ -273,7 +296,7 @@ class StringParser implements ILookahead
 		return null;
 	}
 
-	private function testParser(char:String, parser:ICharacterParser, id:String, parentId:String, allowOptionRecover:Bool):String
+	private function testParser(char:String, parser:ICharacterParser, id:String, parentId:String, allowOptionRecover:Bool, parserFinished:Bool):String
 	{
 		var newOptions:Array<ICharacterParser> = parser.acceptCharacter(char,id,this);
 		
@@ -287,13 +310,13 @@ class StringParser implements ILookahead
 				++_idsAtIndex;
 			}
 			
-			if(newOptions.length>1 || newOptions[0]!=parser){
+			if(newOptions.length>1 || newOptions[0]!=parser || parserFinished){
 				_currentOptions = newOptions;
 				if(skipWhitespsace(char)){
 					return null;
 				}else{
 					var index:Int = _openParserIds.length;
-					var childId:String = findCurrentParser(char, id, newOptions);
+					var childId:String = findCurrentParser(char, id, newOptions, false);
 					if(childId!=null){
 						storeCurrentString();
 						_openParserIds.insert(index, id);
