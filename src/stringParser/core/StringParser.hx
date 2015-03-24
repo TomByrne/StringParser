@@ -64,6 +64,8 @@ class StringParser implements ILookahead
 	private var _lastChild:Map<String, String>;
 	private var _nextSibling:Map<String, String>;
 	private var _parsers:Map<String, ICharacterParser>;
+	private var _startIndices:Map<String, Int>;
+	private var _endIndices:Map<String, Int>;
 
 	private var _currentId:String;
 	private var _currentParser:ICharacterParser;
@@ -111,6 +113,8 @@ class StringParser implements ILookahead
 			_firstChild = null;
 			_lastChild = null;
 			_nextSibling = null;
+			_startIndices = null;
+			_endIndices = null;
 			
 			_currentOptions = null;
 			_currentParser = null;
@@ -138,6 +142,8 @@ class StringParser implements ILookahead
 			_firstChild = new Map();
 			_lastChild = new Map();
 			_nextSibling = new Map();
+			_startIndices = new Map();
+			_endIndices = new Map();
 		}
 	}
 
@@ -151,63 +157,49 @@ class StringParser implements ILookahead
 		}else{
 			//var nextId:String = getNextId();
 			if (_currentParser == null) {
-				if (_currentOptions == null){
-					_currentOptions = this.config;
-				}
-				newPacketId = findCurrentParser(char, null, _currentOptions, _finishedOnCurrent);
-				newParser = _getParser(newPacketId);
-				if(newParser==null){
-					throw "No parser found for character at: "+progress;
-				}
-				if(_firstPacketId==null){
-					_firstPacketId = newPacketId;
-				}else {
-					_nextSibling.set(_lastRootPacketId, newPacketId);
-				}
-				_lastRootPacketId = newPacketId;
-				setCurrentParser(newParser,newPacketId);
-				_finishedOnCurrent = false;
+				findRootParser(char);
 			}else{
 				if((newPacketId = testParser(char,_currentParser,_currentId,_getParent(_currentId),true, _finishedOnCurrent))!=null){
 					newParser = _getParser(newPacketId);
 					if(newParser!=_currentParser || _finishedOnCurrent){
+						storeCurrentString();
 						//nextId = getNextId();
 						setCurrentParser(newParser,newPacketId);
 						_finishedOnCurrent = false;
 					}
 				}else if(!skipWhitespsace(char)){
 					storeCurrentString();
-					var firstTry:Bool = true;
 					
 					var oldCurrId:String = _currentId;
 					
-					var i:Int=0;
-					while(i<_openParserIds.length && (_finishedOnCurrent || firstTry)){
-						firstTry = false;
-						
+					var i:Int = 0;
+					var found:Bool = false;
+					_finishedOnCurrent = true;
+					while(i<_openParserIds.length && _finishedOnCurrent){
 						var parentId:String = _openParserIds[_openParserIds.length-1-i];
 						var parentParser:ICharacterParser = _getParser(parentId);
-						newPacketId = testParser(char,parentParser,parentId,_getParent(parentId),true, true);
+						newPacketId = testParser(char,parentParser,parentId,_getParent(parentId), true, false);
 						
+						_openParserIds.splice(_openParserIds.length-1-i,i+1);
 						if(newPacketId!=null){
 							newParser = _getParser(newPacketId);
-							
-							//_openParsers.splice(_openParsers.length-1-i,i+1);
-							_openParserIds.splice(_openParserIds.length-1-i,i+1);
 							
 							if(newParser==parentParser){
 								_currentId = parentId;
 								_currentParser = newParser;
 							}else{
 								setCurrentParser(newParser,newPacketId);
-								addToList(newPacketId,parentId);
 							}
 							_finishedOnCurrent = false;
+							found = true;
 							break;
-						}else{
-							_finishedOnCurrent = true;
 						}
 						++i;
+					}
+					if (!found) {
+						_currentParser = null;
+						_currentOptions = null;
+						findRootParser(char);
 					}
 				}else{
 					_finishedOnCurrent = true;
@@ -230,6 +222,29 @@ class StringParser implements ILookahead
 			storeCurrentString();
 		}
 	}
+	
+	function findRootParser(char:String) 
+	{
+		var newPacketId:String;
+		var newParser:ICharacterParser;
+		if (_currentOptions == null){
+			_currentOptions = this.config;
+		}
+		newPacketId = findCurrentParser(char, null, _currentOptions, _finishedOnCurrent);
+		newParser = _getParser(newPacketId);
+		if(newParser==null){
+			throw "No root parser found for character at: "+progress;
+		}
+		_startIndices.set(newPacketId, progress);
+		if(_firstPacketId==null){
+			_firstPacketId = newPacketId;
+		}else {
+			_nextSibling.set(_lastRootPacketId, newPacketId);
+		}
+		_lastRootPacketId = newPacketId;
+		setCurrentParser(newParser,newPacketId);
+		_finishedOnCurrent = false;
+	}
 
 	private function getNextId():String{
 		return progress+" "+_idsAtIndex;
@@ -238,9 +253,6 @@ class StringParser implements ILookahead
 	private function setCurrentParser(parser:ICharacterParser, id:String):Void{
 		_currentParser = parser;
 		_currentId = id;
-		_parsers.set(id, parser);
-		
-		_idsAtIndex++;
 	}
 	private function addToList(id:String, parentId:String):Void{
 		if(parentId!=null){
@@ -276,6 +288,7 @@ class StringParser implements ILookahead
 			}
 			_startCurrentString = -1;
 		}
+		_endIndices.set(_currentId, progress);
 	}
 
 	private function findCurrentParser(char:String, parentId:String, inParsers:Array<ICharacterParser>, parserFinished:Bool):String{
@@ -284,11 +297,7 @@ class StringParser implements ILookahead
 		for(parser in inParsers){
 			if((childId = testParser(char,parser,nextId,parentId,false,parserFinished))!=null){
 				if(childId==nextId){
-					/*if(parentId!=null && parentId!=_currentId){
-						addToList(parentId,_getParent(parentId));
-					}*/
 					_parents.set(childId, parentId);
-					addToList(childId,parentId);
 				}
 				return childId;
 			}
@@ -298,38 +307,47 @@ class StringParser implements ILookahead
 
 	private function testParser(char:String, parser:ICharacterParser, id:String, parentId:String, allowOptionRecover:Bool, parserFinished:Bool):String
 	{
-		var newOptions:Array<ICharacterParser> = parser.acceptCharacter(char,id,this);
+		var newOptions:Array<ICharacterParser> = parser.acceptCharacter(char, id, this);
+		
+		var childPar = _getParser(id) != null ? id : parentId;
 		
 		if(newOptions==null && _currentOptions!=null && allowOptionRecover){
 			newOptions = _currentOptions;
 		}
 		if(newOptions!=null){
-			if(_getParser(id)==null){
-				_parsers.set(id, parser);
-				_parents.set(id, parentId);
-				++_idsAtIndex;
-			}
-			
 			if(newOptions.length>1 || newOptions[0]!=parser || parserFinished){
 				_currentOptions = newOptions;
 				if(skipWhitespsace(char)){
 					return null;
 				}else{
 					var index:Int = _openParserIds.length;
-					var childId:String = findCurrentParser(char, id, newOptions, false);
+					var childId:String = findCurrentParser(char, childPar, newOptions, false);
 					if(childId!=null){
 						storeCurrentString();
 						_openParserIds.insert(index, id);
+						addParser(childId, parser, childPar);
 					}
 					return childId;
 				}
-			}else{
+			}else {
+				addParser(id, parser, parentId);
+			
 				_currentOptions = null;
 				return id;
 			}
 		}else{
 			_currentOptions = null;
 			return null;
+		}
+	}
+	
+	function addParser(id:String, parser:ICharacterParser, parentId:String){
+		if(_getParser(id)==null){
+			_parsers.set(id, parser);
+			_parents.set(id, parentId);
+			addToList(id,parentId);
+			_startIndices.set(id, progress);
+			++_idsAtIndex;
 		}
 	}
 
@@ -370,5 +388,11 @@ class StringParser implements ILookahead
 		}else{
 			return _strings.get(packetId);
 		}
+	}
+	public function getStartIndex(packetId:String):Int{
+		return _startIndices.get(packetId);
+	}
+	public function getEndIndex(packetId:String):Int{
+		return _endIndices.get(packetId);
 	}
 }

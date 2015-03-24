@@ -17,6 +17,7 @@ class CharListParser extends AbstractCharacterParser
 	}
 
 	private static inline var COLLECTING:String = "collecting";
+	private static inline var FINISHED:String = "finished";
 
 	@:isVar public var acceptChars(default, set):Array<String>;
 	private function set_acceptChars(value:Array<String>):Array<String>{
@@ -46,12 +47,15 @@ class CharListParser extends AbstractCharacterParser
 
 
 	override public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead):Array<ICharacterParser> {
+		if (getVar(packetId, FINISHED)) return null;
+		
 		var isCollecting:Bool = getVar(packetId, COLLECTING);
 		if (_charLookup.exists(char)) {
 			setVar(packetId, COLLECTING, true);
 			return _selfVector;
 		}else{
 			if (isCollecting) {
+				setVar(packetId, FINISHED, true);
 				return childParsers;
 			}else {
 				return null;

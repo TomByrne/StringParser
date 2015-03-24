@@ -4,7 +4,7 @@ import flash.net.URLLoader;
 import flash.net.URLRequest;
 import stringParser.core.IInterpretter;
 
-class FileStringParserTester extends StringParserTester
+class FileStringParserTester<ResultType> extends StringParserTester<ResultType>
 {
 
 

@@ -63,8 +63,8 @@ class BracketPairParser extends AbstractCharacterParser
 						if (matchToken(char, lookahead, closeBracket)) {
 							newState = Closing;
 							ret = _selfVector;
-						}
-						if (childSeperators != null) {
+							
+						}else if (childSeperators != null) {
 							for(childSeperator in childSeperators){
 								if(matchToken(char, lookahead, childSeperator)){
 									ret = _selfVector;

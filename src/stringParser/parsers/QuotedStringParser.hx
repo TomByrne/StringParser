@@ -64,6 +64,10 @@ class QuotedStringParser extends AbstractCharacterParser
 
 
 	override public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead):Array<ICharacterParser>{
+		var ignore:Int = getVar(packetId, TO_IGNORE);
+		if (ignore > 0) {
+			return _selfVector;
+		}
 		if (!getVar(packetId, OPEN)) {
 			var matched:String = doesMatch(_openQuoteLookup, char, lookahead);
 			if(matched!=null){
@@ -75,7 +79,8 @@ class QuotedStringParser extends AbstractCharacterParser
 			}else{
 				return null;
 			}
-		}else if(escapeChar==null || getVar(packetId,LAST_CHAR)!=escapeChar){
+		}else if (escapeChar == null || getVar(packetId, LAST_CHAR) != escapeChar) {
+			
 			var matched:String;
 			if (_closeQuoteLookup != null) {
 				matched = doesMatch(_closeQuoteLookup, char, lookahead);

@@ -2,7 +2,7 @@ package stringParser.test;
 import stringParser.core.IInterpretter;
 import stringParser.core.StringParserIterator;
 
-class StringParserTester
+class StringParserTester<ResultType>
 {
 
 	@:isVar public var running(default, set):Bool;
@@ -17,10 +17,10 @@ class StringParserTester
 		return value;
 	}
 
-	private var _tests:Array<TestInfo>;
+	private var _tests:Array<TestInfo<ResultType>>;
 
 	private var _currentIndex:Int;
-	private var _currentTest:TestInfo;
+	private var _currentTest:TestInfo<ResultType>;
 
 	private var _name:String;
 	private var _interpretter:IInterpretter;
@@ -45,7 +45,7 @@ class StringParserTester
 		startTest(_currentTest);
 	}
 
-	private function startTest(test:TestInfo):Void{
+	private function startTest(test:TestInfo<ResultType>):Void{
 		var iterator:StringParserIterator = _interpretter.getIterator();
 		
 		_interpretter.setInputString(test.string);
@@ -57,7 +57,7 @@ class StringParserTester
 			onTestFinished(test);
 		}
 	}
-	private function onTestFinished(test:TestInfo):Void {
+	private function onTestFinished(test:TestInfo<ResultType>):Void {
 		var success = test.testFunc(_interpretter.getResult(), test.string);
 		
 		if (success) {
@@ -69,8 +69,8 @@ class StringParserTester
 		else trace(_name+" Tests Finished");
 	}
 }
-typedef TestInfo = {
+typedef TestInfo<ResultType> = {
 	public var string:String;
-	public var testFunc:Dynamic->String->Bool;
+	public var testFunc:ResultType->String->Bool;
 	public var runAsynchronous:Bool;
 }

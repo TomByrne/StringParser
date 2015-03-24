@@ -130,11 +130,6 @@ class StringParserIterator
 		var id:String = _stringParser.firstPacketId;
 		while(i<_stringParser.totalPackets){
 			var parentId:String = _stringParser.getParent(id);
-			/*_params[0] = id;
-			_params[1] = parentId;
-			_params[2] = _stringParser.getParser(id);
-			_params[3] = _stringParser.getStrings(id);
-			_func.apply(null,_params);*/
 			_func(id, parentId, _stringParser.getParser(id), _stringParser.getStrings(id));
 			
 			var newId :String = _stringParser.getFirstChild(id);
