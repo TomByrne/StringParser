@@ -1,6 +1,6 @@
 package stringParser;
 
-import stringParser.core.AbstractInterpretter;
+import stringParser.core.AbstractInterpreter;
 import stringParser.parsers.ICharacterParser;
 import stringParser.parsers.MarkupTagParser;
 import stringParser.parsers.BracketPairParser;
@@ -8,7 +8,7 @@ import stringParser.parsers.NameValuePairParser;
 
 
 
-class XmlInterpretter extends AbstractInterpretter
+class XmlInterpreter extends AbstractInterpreter
 {
 	public static var xmlConfig(get, null):Array<ICharacterParser>;
 	private static function get_xmlConfig():Array<ICharacterParser>{

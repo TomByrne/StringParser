@@ -1,16 +1,17 @@
 package stringParser;
 
-import stringParser.core.AbstractInterpretter;
+import stringParser.core.AbstractInterpreter;
 import stringParser.core.StringParser;
 import stringParser.core.StringParserIterator;
 import stringParser.parsers.BracketPairParser;
 import stringParser.parsers.ICharacterParser;
 import stringParser.parsers.NameValuePairParser;
 import stringParser.parsers.QuotedStringParser;
+import stringParser.parsers.WhitespaceParser;
 
 
 
-class JsonInterpretter extends AbstractInterpretter
+class JsonInterpreter extends AbstractInterpreter
 {
 	public static var jsonConfig(get, null):Array<ICharacterParser>;
 	private static function get_jsonConfig():Array<ICharacterParser>{
@@ -42,6 +43,7 @@ class JsonInterpretter extends AbstractInterpretter
 	private static function checkInit():Void{
 		if(_jsonConfig==null){
 			_jsonConfig = [];
+			_jsonConfig.push(WhitespaceParser.instance);
 			
 			objectParser = new BracketPairParser("{","}",null,[","]);
 			_jsonConfig.push(objectParser);

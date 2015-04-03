@@ -1,5 +1,5 @@
 package stringParser.test;
-import stringParser.core.IInterpretter;
+import stringParser.core.IInterpreter;
 import stringParser.core.StringParserIterator;
 
 class StringParserTester<ResultType>
@@ -23,11 +23,11 @@ class StringParserTester<ResultType>
 	private var _currentTest:TestInfo<ResultType>;
 
 	private var _name:String;
-	private var _interpretter:IInterpretter;
+	private var _interpreter:IInterpreter;
 
-	public function new(name:String, interpretter:IInterpretter) {
+	public function new(name:String, interpreter:IInterpreter) {
 		_name = name;
-		_interpretter = interpretter;
+		_interpreter = interpreter;
 		_tests = [];
 	}
 
@@ -46,9 +46,9 @@ class StringParserTester<ResultType>
 	}
 
 	private function startTest(test:TestInfo<ResultType>):Void{
-		var iterator:StringParserIterator = _interpretter.getIterator();
+		var iterator:StringParserIterator = _interpreter.getIterator();
 		
-		_interpretter.setInputString(test.string);
+		_interpreter.setInputString(test.string);
 		
 		if (test.runAsynchronous) {
 			iterator.iterateAsynchronous(function():Void { onTestFinished(test); } );
@@ -58,7 +58,7 @@ class StringParserTester<ResultType>
 		}
 	}
 	private function onTestFinished(test:TestInfo<ResultType>):Void {
-		var success = test.testFunc(_interpretter.getResult(), test.string);
+		var success = test.testFunc(_interpreter.getResult(), test.string);
 		
 		if (success) {
 			trace(_name+" " + _currentIndex+": Success");

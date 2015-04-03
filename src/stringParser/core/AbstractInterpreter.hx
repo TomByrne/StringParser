@@ -4,7 +4,7 @@ import stringParser.parsers.ICharacterParser;
 
 
 
-class AbstractInterpretter implements IInterpretter
+class AbstractInterpreter implements IInterpreter
 {
 
 	public function getResult():Dynamic{
@@ -19,7 +19,7 @@ class AbstractInterpretter implements IInterpretter
 		return _stringParser.inputString;
 	}
 	private function set_inputString(value:String):String{
-		_iterator.reset();
+		//_iterator.reset();
 		_stringParser.inputString = value;
 		return value;
 	}
@@ -30,8 +30,8 @@ class AbstractInterpretter implements IInterpretter
 	private var _iterator:StringParserIterator;
 
 	public function new(inputString:String){
-		_stringParser = new StringParser(null,getParserConfig());
-		_iterator = new StringParserIterator(_stringParser,interpret,start,finish);
+		_stringParser = new StringParser(null, getParserConfig());
+		_iterator = new StringParserIterator(_stringParser, interpret, start, finish);
 		this.inputString = inputString;
 	}
 	

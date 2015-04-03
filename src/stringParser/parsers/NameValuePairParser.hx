@@ -13,7 +13,12 @@ class NameValuePairParser extends AbstractCharacterParser
 	private function set_nameParser(value:ICharacterParser):ICharacterParser{
 		if(this.nameParser!=value){
 			this.nameParser = value;
-			_nameParserVector[0] = value;
+			_nameParserVector = ( value==null ? finishedParsers : [value].concat(finishedParsers));
+			if(this.nameFirst){
+				_firstParserVector = _nameParserVector;
+			}else{
+				_lastParserVector = _nameParserVector;
+			}
 		}
 		return value;
 	}
@@ -22,10 +27,11 @@ class NameValuePairParser extends AbstractCharacterParser
 	private function set_valueParsers(value:Array<ICharacterParser>):Array<ICharacterParser>{
 		if(this.valueParsers!=value){
 			this.valueParsers = value;
+			_valueParserVector = ( value==null ? finishedParsers : value.concat(finishedParsers));
 			if(this.nameFirst){
-				_lastParserVector = value;
+				_lastParserVector = _valueParserVector;
 			}else{
-				_firstParserVector = value;
+				_firstParserVector = _valueParserVector;
 			}
 		}
 		return value;
@@ -37,9 +43,9 @@ class NameValuePairParser extends AbstractCharacterParser
 			this.nameFirst = value;
 			if(this.nameFirst){
 				_firstParserVector = _nameParserVector;
-				_lastParserVector = this.valueParsers;
+				_lastParserVector = _valueParserVector;
 			}else{
-				_firstParserVector = this.valueParsers;
+				_firstParserVector = _valueParserVector;
 				_lastParserVector = _nameParserVector;
 			}
 		}
@@ -47,6 +53,7 @@ class NameValuePairParser extends AbstractCharacterParser
 	}
 
 	private var _nameParserVector:Array<ICharacterParser>;
+	private var _valueParserVector:Array<ICharacterParser>;
 
 	private var _firstParserVector:Array<ICharacterParser>;
 	private var _lastParserVector:Array<ICharacterParser>;
@@ -56,19 +63,20 @@ class NameValuePairParser extends AbstractCharacterParser
 
 	public function new(nameParser:ICharacterParser = null, ?valueParsers:Array<ICharacterParser>, ?seperator:String) {
 		super();
-		_nameParserVector = [];
+		_nameParserVector = finishedParsers;
+		_valueParserVector = finishedParsers;
 		this.nameFirst = true;
 		this.nameParser = nameParser;
 		this.valueParsers = valueParsers;
 		this.seperator = seperator;
 	}
 
-	override public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead):Array<ICharacterParser>{
+	override public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead, packetChildren:Int):Array<ICharacterParser>{
 		
 		var state:State = getVar(packetId, STATE);
 		var prog:Int = getVar(packetId, PROGRESS);
 		
-		if (state == null) {
+		if (state == null || packetChildren==0) {
 			setVar(packetId,STATE,First);
 			setVar(packetId,PROGRESS,1);
 			return _firstParserVector;
@@ -91,7 +99,7 @@ class NameValuePairParser extends AbstractCharacterParser
 				case Last:
 					setVar(packetId,STATE,null);
 					setVar(packetId, PROGRESS, null);
-					return null;
+					return packetChildren < 2 ? _lastParserVector : finishedParsers;
 					
 			}
 			if (newState!=null) {

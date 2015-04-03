@@ -11,8 +11,9 @@ class BracketPairParser extends AbstractCharacterParser
 
 
 
-
+	
 	public var childParsers:Array<ICharacterParser>;
+	private var allChildParsers:Array<ICharacterParser>;
 
 	public var openBracket:String;
 	public var closeBracket:String;
@@ -27,11 +28,14 @@ class BracketPairParser extends AbstractCharacterParser
 		this.childSeperators = childSeperators;
 	}
 
-	override public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead):Array<ICharacterParser>{
+	override public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead, packetChildren:Int):Array<ICharacterParser>{
 		var prog:Int = getVar(packetId, PROGRESS);
 		var state:State = getVar(packetId, STATE);
 		
-		if(state==null){
+		if (state == Closed) {
+			return null;
+			
+		}else if(state==null){
 			if(matchToken(char,lookahead,openBracket)){
 				// first character
 				setVar(packetId,STATE,Opening);
@@ -45,20 +49,20 @@ class BracketPairParser extends AbstractCharacterParser
 			var ret:Array<ICharacterParser> = null;
 			var lastChar:String = char;
 			
-			var doEscape:Bool = (escapeChar != null || getVar(packetId, LAST_CHAR) == escapeChar);
+			var doEscape:Bool = (escapeChar != null && getVar(packetId, LAST_CHAR) == escapeChar);
 			switch(state) {
 				case Opening:
 					if (prog == openBracket.length) {
 						newState = Children;
 						if(childParsers!=null){
 							lastChar = null;
-							ret = childParsers;
+							ret = getAllChildParsers();
 						}else {
 							ret = _selfVector;
 						}
 					}
 				case Children:
-					ret = childParsers;
+					ret = getAllChildParsers();
 					if(!doEscape){
 						if (matchToken(char, lookahead, closeBracket)) {
 							newState = Closing;
@@ -75,11 +79,12 @@ class BracketPairParser extends AbstractCharacterParser
 					}
 				case Closing:
 					if (prog == openBracket.length) {
-						setVar(packetId, STATE, null);
+						setVar(packetId, STATE, Closed);
 						setVar(packetId, PROGRESS, null);
 						setVar(packetId, LAST_CHAR, null);
-						return null;
+						return finishedParsers;
 					}
+				case Closed: // already dealt with at top
 			}
 			if (newState!=null) {
 				setVar(packetId, LAST_CHAR, null);
@@ -91,6 +96,16 @@ class BracketPairParser extends AbstractCharacterParser
 			}
 			return ret;
 		}
+	}
+	function getAllChildParsers(){
+		if(allChildParsers == null){
+			if (childParsers != null) {
+				allChildParsers = childParsers.concat(finishedParsers);
+			}else {
+				allChildParsers = finishedParsers;
+			}
+		}
+		return allChildParsers;
 	}
 
 	override public function parseCharacter(char:String, packetId:String, lookahead:ILookahead):Bool {
@@ -107,4 +122,5 @@ private enum State {
 	Opening;
 	Children;
 	Closing;
+	Closed;
 }

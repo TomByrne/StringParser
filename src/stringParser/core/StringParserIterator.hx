@@ -3,11 +3,13 @@ package stringParser.core;
 #if flash
 import flash.display.Shape;
 import flash.events.Event;
+import haxe.Timer;
+#elseif (java || js || python)
+import haxe.Timer;
 #end
 
 
 import stringParser.parsers.ICharacterParser;
-import haxe.Timer;
 
 class StringParserIterator
 {
@@ -29,7 +31,7 @@ class StringParserIterator
 			func();
 		}
 	}
-	#else
+	#elseif (js || python || java)
 	private static var _fps:Float = 30;
 	public static function setFPS(fps:Float):Void {
 		_fps = fps;
@@ -89,8 +91,8 @@ class StringParserIterator
 
 	private var _asyncCompleteHandler:Void->Void;
 
-	public function new(stringParser:StringParser, func:String->String->ICharacterParser->Dynamic->Void, ?start:Void->Void, ?finish:Void->Void/*, ?additionalParams:Array<Dynamic>*/){
-		_stringParser = stringParser;
+	public function new(parser:StringParser, func:String->String->ICharacterParser->Dynamic->Void, ?start:Void->Void, ?finish:Void->Void/*, ?additionalParams:Array<Dynamic>*/){
+		_stringParser = parser;
 		_func = func;
 		_start = start;
 		_finish = finish;
@@ -101,7 +103,7 @@ class StringParserIterator
 			_params = _params.concat([]);
 		}*/
 	}
-	public function reset():Void{
+	private function reset():Void{
 		_state = 0;
 		phase1CurrStep = 0;
 		phase2CurrStep = 0;
@@ -110,6 +112,7 @@ class StringParserIterator
 	}
 
 	public function iterateSynchronous():Void{
+		if (_state == 3) reset();
 		if(_state>0){
 			throw "iteration has already begun";
 		}
@@ -140,11 +143,13 @@ class StringParserIterator
 			++i;
 		}
 		phase2CurrStep = _stringParser.totalPackets;
-		if (_finish != null) _finish();
 		_state = 3;
+		if (_finish != null) _finish();
 	}
-
-	public function iterateAsynchronous(onComplete:Void->Void):Void{
+	
+	#if (flash || js || java || python)
+	public function iterateAsynchronous(onComplete:Void->Void):Void {
+		if (_state == 3) reset();
 		if(_state>0){
 			throw "iteration has already begun";
 		}
@@ -207,13 +212,15 @@ class StringParserIterator
 			_phase2Id = newId;
 			
 			++phase2CurrStep;
-			if(_stringParser.totalPackets==phase2CurrStep){
+			if (_stringParser.totalPackets == phase2CurrStep) {
+				_state = 3;
 				removeAsycHandler(doPhase2LoopDef);
 				if (_finish != null) _finish();
 				_asyncCompleteHandler();
 			}
 		}
 	}
+	#end
 
 	private function getNext(id:String):String{
 		var newId:String = _stringParser.getNextSibling(id);

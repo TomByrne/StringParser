@@ -63,7 +63,7 @@ class QuotedStringParser extends AbstractCharacterParser
 	}
 
 
-	override public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead):Array<ICharacterParser>{
+	override public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead, packetChildren:Int):Array<ICharacterParser>{
 		var ignore:Int = getVar(packetId, TO_IGNORE);
 		if (ignore > 0) {
 			return _selfVector;

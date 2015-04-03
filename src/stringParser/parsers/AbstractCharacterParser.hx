@@ -5,18 +5,20 @@ import stringParser.core.ILookahead;
 
 class AbstractCharacterParser implements ICharacterParser
 {
+	public var finishedParsers:Array<ICharacterParser>;
+	
 	private var _selfVector:Array<ICharacterParser>;
 
 	private var _varStorage:Map<String, Map<String, Dynamic>>;
 	private var _isResetting:Bool;
 
-	public function new(){
-		
+	public function new(doWhitespace:Bool=true){
+		finishedParsers = doWhitespace ? [WhitespaceParser.instance] : null;
 		_selfVector = [];
 		_selfVector.push(this);
 	}
 
-	public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead):Array<ICharacterParser>
+	public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead, childCount:Int):Array<ICharacterParser>
 	{
 		return null;
 	}
@@ -39,7 +41,11 @@ class AbstractCharacterParser implements ICharacterParser
 			storage = new Map<String, Dynamic>();
 			_varStorage.set(name, storage);
 		}
-		storage.set(packetId, value);
+		if(value == null){
+			storage.remove(packetId);
+		}else {
+			storage.set(packetId, value);
+		}
 	}
 	private function getVar(packetId:String, name:String):Dynamic{
 		if(_varStorage==null || !_varStorage.exists(name)){
@@ -48,6 +54,10 @@ class AbstractCharacterParser implements ICharacterParser
 			return _varStorage.get(name).get(packetId);
 		}
 		
+	}
+	
+	public function ignore(packetId:String):Bool {
+		return false;
 	}
 	
 	public function reset():Void {

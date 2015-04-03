@@ -2,14 +2,14 @@ package stringParser.test;
 import flash.events.Event;
 import flash.net.URLLoader;
 import flash.net.URLRequest;
-import stringParser.core.IInterpretter;
+import stringParser.core.IInterpreter;
 
 class FileStringParserTester<ResultType> extends StringParserTester<ResultType>
 {
 
 
-	public function new(name:String, interpretter:IInterpretter){
-		super(name, interpretter);
+	public function new(name:String, interpreter:IInterpreter){
+		super(name, interpreter);
 	}
 
 

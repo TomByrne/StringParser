@@ -3,9 +3,9 @@ package stringParserTest;
 import flash.display.Sprite;
 import stringParser.test.FileStringParserTester;
 import stringParser.test.ObjectsEqual;
-import stringParser.XmlInterpretter;
+import stringParser.XmlInterpreter;
 
-import stringParser.JsonInterpretter;
+import stringParser.JsonInterpreter;
 import stringParser.core.StringParser;
 import stringParser.core.StringParserIterator;
 
@@ -19,13 +19,13 @@ class TestBed extends Sprite
 	{
 		super();
 		
-		var tester:FileStringParserTester = new FileStringParserTester("JSON", new JsonInterpretter());
+		var tester:FileStringParserTester<Dynamic> = new FileStringParserTester("JSON", new JsonInterpreter());
 		tester.addTestFile("testJs/test1.js", testJs, false);
 		tester.running = true;
 		
-		tester = new FileStringParserTester("XML", new XmlInterpretter());
+		/*tester = new FileStringParserTester("XML", new XmlInterpreter());
 		tester.addTestFile("testXml/test1.xml", testXml, false);
-		tester.running = true;
+		tester.running = true;*/
 	}
 	
 	private function testJs(result:Dynamic, string:String):Bool {

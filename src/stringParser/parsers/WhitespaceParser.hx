@@ -34,11 +34,15 @@ class WhitespaceParser extends AbstractCharacterParser
 	private var _charLookup:Map<String, Bool>;
 
 	public function new(?characters:Array<String>) {
-		super();
+		super(false);
 		this.characters = (characters==null?WHITESPACE_CHARS:characters);
 	}
+	
+	override public function ignore(packetId:String):Bool {
+		return true;
+	}
 
-	override public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead):Array<ICharacterParser>{
+	override public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead, packetChildren:Int):Array<ICharacterParser>{
 		return _charLookup.exists(char)?_selfVector:null;
 	}
 
