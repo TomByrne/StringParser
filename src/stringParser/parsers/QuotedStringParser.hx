@@ -1,5 +1,6 @@
 package stringParser.parsers;
 import stringParser.core.ILookahead;
+import stringParser.core.ParserStorage;
 
 
 
@@ -63,42 +64,42 @@ class QuotedStringParser extends AbstractCharacterParser
 	}
 
 
-	override public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead, packetChildren:Int):Array<ICharacterParser>{
-		var ignore:Int = getVar(packetId, TO_IGNORE);
+	override public function acceptCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead, packetChildren:Int):Array<ICharacterParser>{
+		var ignore:Int = storage.getVar(this, packetId, TO_IGNORE);
 		if (ignore > 0) {
 			return _selfVector;
 		}
-		if (!getVar(packetId, OPEN)) {
+		if (!storage.getVar(this, packetId, OPEN)) {
 			var matched:String = doesMatch(_openQuoteLookup, char, lookahead);
 			if(matched!=null){
 				// first character
-				setVar(packetId,OPENED_QUOTE,matched);
-				setVar(packetId,OPEN,true);
-				setVar(packetId,TO_IGNORE,matched.length);
+				storage.setVar(this, packetId,OPENED_QUOTE,matched);
+				storage.setVar(this, packetId,OPEN,true);
+				storage.setVar(this, packetId,TO_IGNORE,matched.length);
 				return _selfVector;
 			}else{
 				return null;
 			}
-		}else if (escapeChar == null || getVar(packetId, LAST_CHAR) != escapeChar) {
+		}else if (escapeChar == null || storage.getVar(this, packetId, LAST_CHAR) != escapeChar) {
 			
 			var matched:String;
 			if (_closeQuoteLookup != null) {
 				matched = doesMatch(_closeQuoteLookup, char, lookahead);
 			}else {
-				matched = getVar(packetId, OPENED_QUOTE);
+				matched = storage.getVar(this, packetId, OPENED_QUOTE);
 				if (lookahead.lookahead(matched.length) != matched) {
 					matched = null;
 				}
 			}
 			if(matched!=null){
-				setVar(packetId,OPENED_QUOTE,null);
-				setVar(packetId,LAST_CHAR,null);
-				setVar(packetId,OPEN,false);
-				setVar(packetId,TO_IGNORE,matched.length);
+				storage.setVar(this, packetId,OPENED_QUOTE,null);
+				storage.setVar(this, packetId,LAST_CHAR,null);
+				storage.setVar(this, packetId,OPEN,false);
+				storage.setVar(this, packetId,TO_IGNORE,matched.length);
 				return _selfVector;
 			}
 		}
-		setVar(packetId,LAST_CHAR,char);
+		storage.setVar(this, packetId,LAST_CHAR,char);
 		return _selfVector;
 	}
 	
@@ -114,11 +115,11 @@ class QuotedStringParser extends AbstractCharacterParser
 		}
 	}
 
-	override public function parseCharacter(char:String, packetId:String, lookahead:ILookahead):Bool {
-		var ignore:Null<Int> = getVar(packetId, TO_IGNORE);
+	override public function parseCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead):Bool {
+		var ignore:Null<Int> = storage.getVar(this, packetId, TO_IGNORE);
 		if (ignore != null && ignore > 0) {
 			ignore--;
-			setVar(packetId,TO_IGNORE,ignore);
+			storage.setVar(this, packetId,TO_IGNORE,ignore);
 			return false;
 		}else{
 			return true;

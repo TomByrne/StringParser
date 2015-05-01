@@ -1,15 +1,22 @@
 package stringParser.parsers;
 import stringParser.core.ILookahead;
+import stringParser.core.ParserStorage;
 
 
 
 class AbstractCharacterParser implements ICharacterParser
 {
-	public var finishedParsers:Array<ICharacterParser>;
+	@:isVar public var finishedParsers(get, set):Array<ICharacterParser>;
+	function get_finishedParsers():Array<ICharacterParser>{
+		return finishedParsers;
+	}
+	function set_finishedParsers(value:Array<ICharacterParser>):Array<ICharacterParser>{
+		return finishedParsers = value;
+	}
 	
 	private var _selfVector:Array<ICharacterParser>;
 
-	private var _varStorage:Map<String, Map<String, Dynamic>>;
+	//private var _varStorage:Map<String, Map<String, Dynamic>>;
 	private var _isResetting:Bool;
 
 	public function new(doWhitespace:Bool=true){
@@ -18,12 +25,12 @@ class AbstractCharacterParser implements ICharacterParser
 		_selfVector.push(this);
 	}
 
-	public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead, childCount:Int):Array<ICharacterParser>
+	public function acceptCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead, childCount:Int):Array<ICharacterParser>
 	{
 		return null;
 	}
 
-	public function parseCharacter(char:String, packetId:String, lookahead:ILookahead):Bool
+	public function parseCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead):Bool
 	{
 		return false;
 	}
@@ -32,7 +39,7 @@ class AbstractCharacterParser implements ICharacterParser
 		return (token != null && ((token.length == 1 && char == token) || lookahead.lookahead(token.length) == token));
 	}
 
-	private function setVar(packetId:String, name:String, value:Dynamic):Void{
+	/*private function setVar(packetId:String, name:String, value:Dynamic):Void{
 		if(_varStorage==null){
 			_varStorage = new Map();
 		}
@@ -54,13 +61,13 @@ class AbstractCharacterParser implements ICharacterParser
 			return _varStorage.get(name).get(packetId);
 		}
 		
-	}
+	}*/
 	
-	public function ignore(packetId:String):Bool {
+	public function ignore(storage:ParserStorage, packetId:String):Bool {
 		return false;
 	}
 	
-	public function reset():Void {
+	/*public function reset():Void {
 		if (_isResetting) return;
 		_isResetting = true;
 		_varStorage = null;
@@ -72,7 +79,7 @@ class AbstractCharacterParser implements ICharacterParser
 		}
 		_isResetting = false;
 	}
-	
+	*/
 	private function getChildParsers():Null<Array<ICharacterParser>> {
 		return null;	
 	}

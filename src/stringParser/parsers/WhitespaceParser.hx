@@ -1,5 +1,6 @@
 package stringParser.parsers;
 import stringParser.core.ILookahead;
+import stringParser.core.ParserStorage;
 
 class WhitespaceParser extends AbstractCharacterParser
 {
@@ -38,15 +39,15 @@ class WhitespaceParser extends AbstractCharacterParser
 		this.characters = (characters==null?WHITESPACE_CHARS:characters);
 	}
 	
-	override public function ignore(packetId:String):Bool {
+	override public function ignore(storage:ParserStorage, packetId:String):Bool {
 		return true;
 	}
 
-	override public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead, packetChildren:Int):Array<ICharacterParser>{
+	override public function acceptCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead, packetChildren:Int):Array<ICharacterParser>{
 		return _charLookup.exists(char)?_selfVector:null;
 	}
 
-	override public function parseCharacter(char:String, packetId:String, lookahead:ILookahead):Bool{
+	override public function parseCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead):Bool{
 		return false;
 	}
 }

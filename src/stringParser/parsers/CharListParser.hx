@@ -1,5 +1,6 @@
 package stringParser.parsers;
 import stringParser.core.ILookahead;
+import stringParser.core.ParserStorage;
 
 
 
@@ -34,32 +35,72 @@ class CharListParser extends AbstractCharacterParser
 		}
 		return value;
 	}
+
+	@:isVar public var stopChildrenChars(default, set):Array<String>;
+	
+	private function set_stopChildrenChars(value:Array<String>):Array<String>{
+		if(this.stopChildrenChars!=value){
+			this.stopChildrenChars = value;
+			if(this.stopChildrenChars!=null){
+				_stopCharLookup = new Map();
+				for(char in this.stopChildrenChars){
+					_stopCharLookup.set(char, true);
+				}
+			}else{
+				_stopCharLookup = null;
+			}
+		}
+		return value;
+	}
+	
+	@:isVar public var childParsers(get, set):Array<ICharacterParser>;
+	function get_childParsers():Array<ICharacterParser>{
+		return childParsers;
+	}
+	function set_childParsers(value:Array<ICharacterParser>):Array<ICharacterParser> {
+		allChildParsers = null;
+		return childParsers = value;
+	}
+	
+	override function set_finishedParsers(value:Array<ICharacterParser>):Array<ICharacterParser> {
+		allChildParsers = null;
+		return super.set_finishedParsers(value);
+	}
 	
 	public var maxChildren:Int;
-	public var childParsers:Array<ICharacterParser>;
 	private var allChildParsers:Array<ICharacterParser>;
 	
 
 	private var _charLookup:Map<String, Bool>;
+	private var _stopCharLookup:Map<String, Bool>;
 
-	public function new(acceptChars:Array<String>, maxChildren:Int = -1){
+	public function new(acceptChars:Array<String>, maxChildren:Int = -1, stopChildrenChars:Array<String>=null){
 		super();
 		
 		this.acceptChars = acceptChars;
 		this.maxChildren = maxChildren;
+		this.stopChildrenChars = stopChildrenChars;
 	}
 
 
-	override public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead, packetChildren:Int):Array<ICharacterParser> {
-		if (getVar(packetId, FINISHED)) return ( maxChildren==-1 || packetChildren<maxChildren ? getAllChildParsers() : null);
+	override public function acceptCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead, packetChildren:Int):Array<ICharacterParser> {
+		if (storage.getVar(this, packetId, FINISHED)) {
+			if ((_stopCharLookup!=null && _stopCharLookup.exists(char)) || (maxChildren != -1 && packetChildren >= maxChildren)) {
+				// stop searching for children
+				return null;
+			}else {
+				// keep looking for children
+				return getAllChildParsers();
+			}
+		}
 		
-		var isCollecting:Bool = getVar(packetId, COLLECTING);
+		var isCollecting:Bool = storage.getVar(this, packetId, COLLECTING);
 		if (_charLookup.exists(char)) {
-			setVar(packetId, COLLECTING, true);
+			storage.setVar(this, packetId, COLLECTING, true);
 			return _selfVector;
 		}else{
 			if (isCollecting) {
-				setVar(packetId, FINISHED, true);
+				storage.setVar(this, packetId, FINISHED, true);
 				return getAllChildParsers();
 			}else {
 				return null;
@@ -77,12 +118,8 @@ class CharListParser extends AbstractCharacterParser
 		}
 		return allChildParsers;
 	}
-	override public function reset():Void {
-		super.reset();
-		allChildParsers = null;
-	}
 
-	override public function parseCharacter(char:String, packetId:String, lookahead:ILookahead):Bool{
+	override public function parseCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead):Bool{
 		return true;
 	}
 	

@@ -1,5 +1,6 @@
 package stringParser.parsers;
 import stringParser.core.ILookahead;
+import stringParser.core.ParserStorage;
 
 
 
@@ -71,14 +72,14 @@ class NameValuePairParser extends AbstractCharacterParser
 		this.seperator = seperator;
 	}
 
-	override public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead, packetChildren:Int):Array<ICharacterParser>{
+	override public function acceptCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead, packetChildren:Int):Array<ICharacterParser>{
 		
-		var state:State = getVar(packetId, STATE);
-		var prog:Int = getVar(packetId, PROGRESS);
+		var state:State = storage.getVar(this, packetId, STATE);
+		var prog:Int = storage.getVar(this, packetId, PROGRESS);
 		
 		if (state == null || packetChildren==0) {
-			setVar(packetId,STATE,First);
-			setVar(packetId,PROGRESS,1);
+			storage.setVar(this, packetId,STATE,First);
+			storage.setVar(this, packetId,PROGRESS,1);
 			return _firstParserVector;
 		}else {
 			var newState:State = null;
@@ -97,22 +98,22 @@ class NameValuePairParser extends AbstractCharacterParser
 						ret = _selfVector;
 					}
 				case Last:
-					setVar(packetId,STATE,null);
-					setVar(packetId, PROGRESS, null);
+					storage.setVar(this, packetId,STATE,null);
+					storage.setVar(this, packetId, PROGRESS, null);
 					return packetChildren < 2 ? _lastParserVector : finishedParsers;
 					
 			}
 			if (newState!=null) {
-				setVar(packetId, STATE, newState);
-				setVar(packetId, PROGRESS, 1);
+				storage.setVar(this, packetId, STATE, newState);
+				storage.setVar(this, packetId, PROGRESS, 1);
 			}else {
-				setVar(packetId, PROGRESS, prog+1);
+				storage.setVar(this, packetId, PROGRESS, prog+1);
 			}
 			return ret;
 		}
 	}
 
-	override public function parseCharacter(char:String, packetId:String, lookahead:ILookahead):Bool{
+	override public function parseCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead):Bool{
 		return false;
 	}
 	

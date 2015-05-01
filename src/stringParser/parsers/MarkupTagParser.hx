@@ -45,7 +45,7 @@ class MarkupTagParser  extends AbstractCharacterParser
 		this.closingEnd = closingEnd==null?TAG_CLOSE_END:closingEnd;
 	}
 	
-	override public function acceptCharacter(char:String, packetId:String, lookahead:ILookahead, packetCount:Int):Array<ICharacterParser>{
+	override public function acceptCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead, packetCount:Int):Array<ICharacterParser>{
 		var prog:Int = getVar(packetId, PROGRESS);
 		var state:State = getVar(packetId, STATE);
 		if (state == null) {
@@ -123,7 +123,7 @@ class MarkupTagParser  extends AbstractCharacterParser
 		}
 	}
 
-	override public function parseCharacter(char:String, packetId:String, lookahead:ILookahead):Bool{
+	override public function parseCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead):Bool{
 		return false;
 	}
 	

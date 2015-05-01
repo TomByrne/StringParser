@@ -40,6 +40,7 @@ class StringParser implements ILookahead
 	}
 
 	private var _idsAtIndex:Int = -1;
+	private var _line:Int = 0;
 
 	private var _firstPacketId:String;
 	private var _lastRootPacketId:String;
@@ -54,11 +55,13 @@ class StringParser implements ILookahead
 	private var _parsers:Map<String, ICharacterParser>;
 	private var _startIndices:Map<String, Int>;
 	private var _endIndices:Map<String, Int>;
+	private var _lineIndices:Map<String, Int>;
 
 	private var _currentId:String;
 	private var _currentParser:ICharacterParser;
 	private var _finishedOnCurrent:Bool;
 	private var _startCurrentString:Int = -1;
+	private var _parserStorage:ParserStorage;
 
 	private var _currentOptions:Array<ICharacterParser>;
 	//private var _openParsers:Array<ICharacterParser>;
@@ -68,6 +71,7 @@ class StringParser implements ILookahead
 		totalSteps = -1;
 		this.inputString = inputString;
 		this.config = config;
+		_parserStorage = new ParserStorage();
 	}
 
 	public function lookahead(count:Int, includingCurrent:Bool=true):String {
@@ -78,8 +82,10 @@ class StringParser implements ILookahead
 		}
 	}
 
-	private function reset():Void{
-		if(this.inputString!=null && this.config!=null){
+	private function reset():Void {
+		if (this.inputString != null && this.config != null) {
+			_parserStorage.reset();
+			
 			progress = -1;
 			totalSteps = -1;
 			_finishedOnCurrent = false;
@@ -89,6 +95,7 @@ class StringParser implements ILookahead
 			_firstPacketId = null;
 			_lastRootPacketId = null;
 			_idsAtIndex = -1;
+			_line = 1;
 			
 			//_openParsers = null;
 			_currentOptions = null;
@@ -101,13 +108,10 @@ class StringParser implements ILookahead
 			_childCount = null;
 			_startIndices = null;
 			_endIndices = null;
+			_lineIndices = null;
 			
 			_currentOptions = null;
 			_currentParser = null;
-			
-			for (parser in config) {
-				parser.reset();
-			}
 		}
 	}
 	private function init():Void{
@@ -118,6 +122,7 @@ class StringParser implements ILookahead
 			_currentId = null;
 			_totalPackets = 0;
 			_startCurrentString = -1;
+			_line = 1;
 			
 			//_openParsers = new Vector();
 			_openParserIds = [];
@@ -132,6 +137,7 @@ class StringParser implements ILookahead
 			_childCount = new Map();
 			_startIndices = new Map();
 			_endIndices = new Map();
+			_lineIndices = new Map();
 		}
 	}
 
@@ -140,10 +146,19 @@ class StringParser implements ILookahead
 		var newPacketId:String;
 		var newParser:ICharacterParser;
 		
+		if (char == "\r" || char == "\n" ) {
+			var lastChar:String = progress > 0 ? this.inputString.charAt(progress - 1) : null;
+			if (lastChar != null && char == "\n" && lastChar == "\r") {
+				// ignore these, text parser on some platforms adds in additional line breaks
+			}else {
+				_line++;
+			}
+		}
+		
 		//var nextId:String = getNextId();
 		if (_currentParser == null) {
 			findRootParser(char);
-		}else{
+		}else {
 			if((newPacketId = testParser(char,_currentParser,_currentId,_getParent(_currentId), true, _finishedOnCurrent, 0))!=null){
 				newParser = _getParser(newPacketId);
 				if(newParser!=_currentParser || _finishedOnCurrent){
@@ -182,7 +197,7 @@ class StringParser implements ILookahead
 			}
 		}
 		if(_currentParser!=null && !_finishedOnCurrent){
-			if(_currentParser.parseCharacter(char,_currentId, this)){
+			if(_currentParser.parseCharacter(_parserStorage, char,_currentId, this)){
 				if(_startCurrentString==-1){
 					_startCurrentString = progress;
 				}
@@ -212,7 +227,8 @@ class StringParser implements ILookahead
 			throw "No root parser found for character at: "+progress;
 		}
 		_startIndices.set(newPacketId, progress);
-		if(!newParser.ignore(newPacketId)){
+		_lineIndices.set(newPacketId, _line);
+		if(!newParser.ignore(_parserStorage, newPacketId)){
 			if(_firstPacketId==null){
 				_firstPacketId = newPacketId;
 			}else {
@@ -252,7 +268,7 @@ class StringParser implements ILookahead
 		_endIndices.set(_currentId, progress);
 	}
 
-	private function findCurrentParser(char:String, parentId:String, inParsers:Array<ICharacterParser>, parserFinished:Bool, prospective:Int):String{
+	private function findCurrentParser(char:String, parentId:String, inParsers:Array<ICharacterParser>, parserFinished:Bool, prospective:Int):String {
 		var nextId:String = getNextId(prospective);
 		var childId:String;
 		for(parser in inParsers){
@@ -268,7 +284,7 @@ class StringParser implements ILookahead
 
 	private function testParser(char:String, parser:ICharacterParser, id:String, parentId:String, allowOptionRecover:Bool, parserFinished:Bool, prospective:Int):String
 	{
-		var newOptions:Array<ICharacterParser> = parser.acceptCharacter(char, id, this, _getChildCount(id));
+		var newOptions:Array<ICharacterParser> = parser.acceptCharacter(_parserStorage, char, id, this, _getChildCount(id));
 		
 		var childPar = _getParser(id) != null ? id : parentId;
 		
@@ -276,7 +292,7 @@ class StringParser implements ILookahead
 			newOptions = _currentOptions;
 		}
 		if(newOptions!=null){
-			if(newOptions.length>1 || newOptions[0]!=parser || parserFinished){
+			if (newOptions.length > 1 || newOptions[0] != parser || parserFinished) {
 				_currentOptions = newOptions;
 				var index:Int = _openParserIds.length;
 				var childId:String = findCurrentParser(char, childPar, newOptions, false, prospective);
@@ -303,7 +319,7 @@ class StringParser implements ILookahead
 		if(_getParser(id)==null){
 			_parsers.set(id, parser);
 			
-			if(!parser.ignore(id)){
+			if(!parser.ignore(_parserStorage, id)){
 				_parents.set(id, parentId);
 				if(parentId!=null){
 					var lastChild:Dynamic = _getLastChild(parentId);
@@ -323,6 +339,7 @@ class StringParser implements ILookahead
 			}
 			
 			_startIndices.set(id, progress);
+			_lineIndices.set(id, _line);
 			++_idsAtIndex;
 		}
 	}
@@ -373,5 +390,8 @@ class StringParser implements ILookahead
 	}
 	public function getEndIndex(packetId:String):Int{
 		return _endIndices.get(packetId);
+	}
+	public function getLineIndex(packetId:String):Int{
+		return _lineIndices.get(packetId);
 	}
 }
