@@ -79,7 +79,7 @@ class StringParserIterator
 	//private var _executionTimeMilli:Int;
 
 	private var _stringParser:StringParser;
-	private var _func:String->String->ICharacterParser->Dynamic->Void;
+	private var _func:String->String->String->ICharacterParser->Dynamic->Void;
 	private var _start:Null<Void->Void>;
 	private var _finish:Null<Void->Void>;
 	//private var _additionalParams:Array<Dynamic>;
@@ -91,7 +91,7 @@ class StringParserIterator
 
 	private var _asyncCompleteHandler:Void->Void;
 
-	public function new(parser:StringParser, func:String->String->ICharacterParser->Dynamic->Void, ?start:Void->Void, ?finish:Void->Void/*, ?additionalParams:Array<Dynamic>*/){
+	public function new(parser:StringParser, func:String->String->String->ICharacterParser->Dynamic->Void, ?start:Void->Void, ?finish:Void->Void/*, ?additionalParams:Array<Dynamic>*/){
 		_stringParser = parser;
 		_func = func;
 		_start = start;
@@ -133,7 +133,8 @@ class StringParserIterator
 		var id:String = _stringParser.firstPacketId;
 		while(i<_stringParser.totalPackets){
 			var parentId:String = _stringParser.getParent(id);
-			_func(id, parentId, _stringParser.getParser(id), _stringParser.getStrings(id));
+			var key:String = _stringParser.getKey(id);
+			_func(id, parentId, key, _stringParser.getParser(id), _stringParser.getStrings(id));
 			
 			var newId :String = _stringParser.getFirstChild(id);
 			if(newId==null){
@@ -198,13 +199,8 @@ class StringParserIterator
 		while(Timer.stamp()-start<this.executionTime){
 			
 			var parentId:String = _stringParser.getParent(_phase2Id);
-			/*_params[0] = _phase2Id;
-			_params[1] = parentId;
-			_params[2] = _stringParser.getParser(_phase2Id);
-			_params[3] = _stringParser.getStrings(_phase2Id);
-			_func.apply(null,_params);*/
-			_func(_phase2Id, parentId, _stringParser.getParser(_phase2Id), _stringParser.getStrings(_phase2Id));
-			
+			var key = _stringParser.getKey(_phase2Id);
+			_func(_phase2Id, parentId, key, _stringParser.getParser(_phase2Id), _stringParser.getStrings(_phase2Id));
 			var newId :String = _stringParser.getFirstChild(_phase2Id);
 			if(newId==null){
 				newId = getNext(_phase2Id);

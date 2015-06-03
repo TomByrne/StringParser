@@ -48,6 +48,7 @@ class StringParser implements ILookahead
 	private var _strings:Map<String, String>;
 	private var _stringArrays:Map<String, Array<String>>;
 	private var _parents:Map<String, String>;
+	private var _keys:Map<String, String>;
 	private var _firstChild:Map<String, String>;
 	private var _lastChild:Map<String, String>;
 	private var _nextSibling:Map<String, String>;
@@ -102,6 +103,7 @@ class StringParser implements ILookahead
 			_strings = null;
 			_parsers = null;
 			_parents = null;
+			_keys = null;
 			_firstChild = null;
 			_lastChild = null;
 			_nextSibling = null;
@@ -131,6 +133,7 @@ class StringParser implements ILookahead
 			_stringArrays = new Map();
 			_parsers = new Map();
 			_parents = new Map();
+			_keys = new Map();
 			_firstChild = new Map();
 			_lastChild = new Map();
 			_nextSibling = new Map();
@@ -161,7 +164,7 @@ class StringParser implements ILookahead
 		}else {
 			if((newPacketId = testParser(char,_currentParser,_currentId,_getParent(_currentId), true, _finishedOnCurrent, 0))!=null){
 				newParser = _getParser(newPacketId);
-				if(newParser!=_currentParser || _finishedOnCurrent){
+				if(newParser!=_currentParser || newPacketId!=_currentId || _finishedOnCurrent){
 					storeCurrentString();
 					//nextId = getNextId();
 					setCurrentParser(newParser,newPacketId);
@@ -318,6 +321,10 @@ class StringParser implements ILookahead
 	function addParser(id:String, parser:ICharacterParser, parentId:String){
 		if(_getParser(id)==null){
 			_parsers.set(id, parser);
+			if (parentId != null) {
+				var parent = _parsers.get(parentId);
+				_keys.set(id, parent.getKey(_parserStorage, parentId, _childCount.get(parentId)));
+			}
 			
 			if(!parser.ignore(_parserStorage, id)){
 				_parents.set(id, parentId);
@@ -348,6 +355,9 @@ class StringParser implements ILookahead
 	private inline function _getParent(packetId:String):String{
 		return _parents.get(packetId);
 	}
+	private inline function _getKey(packetId:String):String{
+		return _keys.get(packetId);
+	}
 	private inline function _getFirstChild(packetId:String):String{
 		return _firstChild.get(packetId);
 	}
@@ -367,6 +377,9 @@ class StringParser implements ILookahead
 	
 	public function getParent(packetId:String):String{
 		return _getParent(packetId);
+	}
+	public function getKey(packetId:String):String{
+		return _getKey(packetId);
 	}
 	public function getFirstChild(packetId:String):String{
 		return _getFirstChild(packetId);

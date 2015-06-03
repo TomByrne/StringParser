@@ -1,6 +1,7 @@
 package stringParser.parsers;
 import stringParser.core.ILookahead;
 import stringParser.core.ParserStorage;
+import stringParser.core.StringKeys;
 
 
 
@@ -23,6 +24,11 @@ class AbstractCharacterParser implements ICharacterParser
 		finishedParsers = doWhitespace ? [WhitespaceParser.instance] : null;
 		_selfVector = [];
 		_selfVector.push(this);
+	}
+
+	public function getKey(storage:ParserStorage, packetId:String, childIndex:Int):String
+	{
+		return StringKeys.NEXT;
 	}
 
 	public function acceptCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead, childCount:Int):Array<ICharacterParser>

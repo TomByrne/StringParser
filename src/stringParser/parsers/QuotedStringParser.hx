@@ -12,6 +12,7 @@ class QuotedStringParser extends AbstractCharacterParser
 	public static inline var ESCAPE_CHAR:String = "\\";
 
 	private static inline var OPEN:String = "open";
+	private static inline var CLOSING:String = "closing";
 	private static inline var TO_IGNORE:String = "toIgnore";
 	private static inline var LAST_CHAR:String = "lastChar";
 	private static inline var OPENED_QUOTE:String = "openedQuote";
@@ -41,7 +42,7 @@ class QuotedStringParser extends AbstractCharacterParser
 				_closeQuoteLookup = new Map();
 				for (str in this.closeQuoteTypes) {
 					var char = (str.length>1 ? str.charAt(0) : str);
-					_closeQuoteLookup.set(str, str);
+					_closeQuoteLookup.set(char, str);
 				}
 			}else{
 				_closeQuoteLookup = null;
@@ -69,6 +70,10 @@ class QuotedStringParser extends AbstractCharacterParser
 		if (ignore > 0) {
 			return _selfVector;
 		}
+		if (storage.getVar(this, packetId, CLOSING)) {
+			storage.setVar(this, packetId, CLOSING, null);
+			return finishedParsers;
+		}
 		if (!storage.getVar(this, packetId, OPEN)) {
 			var matched:String = doesMatch(_openQuoteLookup, char, lookahead);
 			if(matched!=null){
@@ -92,6 +97,7 @@ class QuotedStringParser extends AbstractCharacterParser
 				}
 			}
 			if(matched!=null){
+				storage.setVar(this, packetId, CLOSING, true);
 				storage.setVar(this, packetId,OPENED_QUOTE,null);
 				storage.setVar(this, packetId,LAST_CHAR,null);
 				storage.setVar(this, packetId,OPEN,false);

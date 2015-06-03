@@ -8,6 +8,7 @@ import stringParser.core.ParserStorage;
 class NumberParser extends AbstractCharacterParser
 {
 	private static inline var PROGRESS:String = "progress";
+	private static inline var COLLECTING:String = "collecting";
 	
 	private static var startCharMap:StringMap<Bool>;
 	private static var charMap:StringMap<Bool>;
@@ -44,6 +45,7 @@ class NumberParser extends AbstractCharacterParser
 	override public function acceptCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead, packetChildren:Int):Array<ICharacterParser>{
 		var prog:Dynamic = storage.getVar(this, packetId, PROGRESS);
 		var progress:Int = ( prog==null ? 0 : cast prog);
+		var isCollecting:Bool = ( prog==null ? false : storage.getVar(this, packetId, COLLECTING));
 		
 		if (progress == 0) {
 			var incCurrent = true;
@@ -58,6 +60,7 @@ class NumberParser extends AbstractCharacterParser
 				var start = lookahead.lookahead(3, incCurrent);
 				if (start.indexOf("0x") == 0 && _charMap.exists(start.charAt(2))) {
 					storage.setVar(this, packetId, PROGRESS, 1);
+					storage.setVar(this, packetId, COLLECTING, true);
 					return _selfVector;
 				}else {
 					return null;
@@ -65,6 +68,7 @@ class NumberParser extends AbstractCharacterParser
 			}
 			if (startCharMap.exists(char)) {
 				storage.setVar(this, packetId, PROGRESS, 1);
+				storage.setVar(this, packetId, COLLECTING, true);
 				return _selfVector;
 			}else {
 				return null;
@@ -82,11 +86,20 @@ class NumberParser extends AbstractCharacterParser
 		}else {
 			// finished
 			storage.setVar(this, packetId, PROGRESS, null);
-			return null;
+			if(isCollecting){
+				storage.setVar(this, packetId, COLLECTING, false);
+				return finishedParsers;
+			}else{
+				return null;
+			}
 		}
 	}
 
 	override public function parseCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead):Bool {
 		return true;
+	}
+	
+	override private function getChildParsers():Null<Array<ICharacterParser>> {
+		return finishedParsers;
 	}
 }

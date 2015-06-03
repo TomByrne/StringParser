@@ -53,7 +53,7 @@ class CharListParser extends AbstractCharacterParser
 		return value;
 	}
 	
-	@:isVar public var childParsers(get, set):Array<ICharacterParser>;
+	/*@:isVar public var childParsers(get, set):Array<ICharacterParser>;
 	function get_childParsers():Array<ICharacterParser>{
 		return childParsers;
 	}
@@ -65,10 +65,10 @@ class CharListParser extends AbstractCharacterParser
 	override function set_finishedParsers(value:Array<ICharacterParser>):Array<ICharacterParser> {
 		allChildParsers = null;
 		return super.set_finishedParsers(value);
-	}
+	}*/
 	
 	public var maxChildren:Int;
-	private var allChildParsers:Array<ICharacterParser>;
+	//private var allChildParsers:Array<ICharacterParser>;
 	
 
 	private var _charLookup:Map<String, Bool>;
@@ -90,7 +90,7 @@ class CharListParser extends AbstractCharacterParser
 				return null;
 			}else {
 				// keep looking for children
-				return getAllChildParsers();
+				return finishedParsers;
 			}
 		}
 		
@@ -101,14 +101,14 @@ class CharListParser extends AbstractCharacterParser
 		}else{
 			if (isCollecting) {
 				storage.setVar(this, packetId, FINISHED, true);
-				return getAllChildParsers();
+				return finishedParsers;
 			}else {
 				return null;
 			}
 		}
 	}
 	
-	inline function getAllChildParsers(){
+	/*inline function getAllChildParsers(){
 		if(allChildParsers == null){
 			if (childParsers != null) {
 				allChildParsers = childParsers.concat(finishedParsers);
@@ -117,13 +117,13 @@ class CharListParser extends AbstractCharacterParser
 			}
 		}
 		return allChildParsers;
-	}
+	}*/
 
 	override public function parseCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead):Bool{
 		return true;
 	}
 	
 	override private function getChildParsers():Null<Array<ICharacterParser>> {
-		return childParsers;
+		return finishedParsers;
 	}
 }

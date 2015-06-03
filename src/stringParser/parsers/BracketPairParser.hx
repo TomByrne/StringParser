@@ -1,6 +1,7 @@
 package stringParser.parsers;
 import stringParser.core.ILookahead;
 import stringParser.core.ParserStorage;
+import stringParser.core.StringKeys;
 
 
 
@@ -9,24 +10,26 @@ class BracketPairParser extends AbstractCharacterParser
 	private static inline var STATE:String = "state";
 	private static inline var PROGRESS:String = "progress";
 	private static inline var LAST_CHAR:String = "lastChar";
+	private static inline var CLOSED_AT:String = "closedAt";
 
 
 
 	
 	public var childParsers:Array<ICharacterParser>;
+	public var nextTokenParsers:Array<ICharacterParser>;
 	private var allChildParsers:Array<ICharacterParser>;
 
 	public var openBracket:String;
 	public var closeBracket:String;
 	public var escapeChar:String;
-	public var childSeperators:Array<String>;
+	public var childSeparators:Array<String>;
 
-	public function new(openBracket:String = null, closeBracket:String = null, escapeChar:String = null, childSeperators:Array<String> = null) {
+	public function new(openBracket:String = null, closeBracket:String = null, escapeChar:String = null, childSeparators:Array<String> = null) {
 		super();
 		this.openBracket = openBracket;
 		this.closeBracket = closeBracket;
 		this.escapeChar = escapeChar;
-		this.childSeperators = childSeperators;
+		this.childSeparators = childSeparators;
 	}
 
 	override public function acceptCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead, packetChildren:Int):Array<ICharacterParser>{
@@ -34,7 +37,7 @@ class BracketPairParser extends AbstractCharacterParser
 		var state:State = storage.getVar(this, packetId, STATE);
 		
 		if (state == Closed) {
-			return null;
+			return nextTokenParsers;
 			
 		}else if(state==null){
 			if(matchToken(char,lookahead,openBracket)){
@@ -52,7 +55,7 @@ class BracketPairParser extends AbstractCharacterParser
 			
 			var doEscape:Bool = (escapeChar != null && storage.getVar(this, packetId, LAST_CHAR) == escapeChar);
 			switch(state) {
-				case Opening, Children:
+				case Opening, Children, Separator:
 					if(state==Opening){
 						if (prog == openBracket.length) {
 							newState = Children;
@@ -70,10 +73,11 @@ class BracketPairParser extends AbstractCharacterParser
 							newState = Closing;
 							ret = _selfVector;
 							
-						}else if (childSeperators != null) {
-							for(childSeperator in childSeperators){
-								if(matchToken(char, lookahead, childSeperator)){
+						}else if (childSeparators != null) {
+							for(childSeparator in childSeparators){
+								if(matchToken(char, lookahead, childSeparator)){
 									ret = _selfVector;
+									newState = Separator;
 									break;
 								}
 							}
@@ -84,7 +88,8 @@ class BracketPairParser extends AbstractCharacterParser
 						storage.setVar(this, packetId, STATE, Closed);
 						storage.setVar(this, packetId, PROGRESS, null);
 						storage.setVar(this, packetId, LAST_CHAR, null);
-						return null;
+						storage.setVar(this, packetId, CLOSED_AT, packetChildren);
+						return nextTokenParsers;
 					}
 				case Closed: // already dealt with at top
 			}
@@ -111,6 +116,11 @@ class BracketPairParser extends AbstractCharacterParser
 	}
 
 	override public function parseCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead):Bool {
+		var state:State = storage.getVar(this, packetId, STATE);
+		if (state == Separator) {
+			return true;
+		}
+		
 		if (childParsers != null) return false;
 		
 		return storage.getVar(this, packetId, STATE)==Children;
@@ -119,10 +129,25 @@ class BracketPairParser extends AbstractCharacterParser
 	override private function getChildParsers():Null<Array<ICharacterParser>> {
 		return childParsers;
 	}
+	
+	override public function getKey(storage:ParserStorage, packetId:String, childIndex:Int):String {
+		var closedAt:Dynamic = storage.getVar(this, packetId, CLOSED_AT);
+		if (closedAt == null) {
+			return StringKeys.CHILD;
+		}else {
+			var closedInt:Int = cast closedAt;
+			if (childIndex < closedAt) {
+				return StringKeys.CHILD;
+			}else {
+				return StringKeys.NEXT;
+			}
+		}
+	}
 }
 private enum State {
 	Opening;
 	Children;
+	Separator;
 	Closing;
 	Closed;
 }

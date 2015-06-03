@@ -4,6 +4,7 @@ import stringParser.core.ParserStorage;
 
 interface ICharacterParser
 {
+	function getKey(storage:ParserStorage, packetId:String, childIndex:Int):String;
 	function acceptCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead, packetChildren:Int):Array<ICharacterParser>;
 	function parseCharacter(storage:ParserStorage, char:String, packetId:String, lookahead:ILookahead):Bool;
 	//function reset():Void;

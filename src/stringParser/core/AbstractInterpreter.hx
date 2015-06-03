@@ -49,7 +49,7 @@ class AbstractInterpreter implements IInterpreter
 	}
 
 
-	private function interpret(id:String, parentId:String, parser:ICharacterParser, strings:Dynamic):Void{
+	private function interpret(id:String, parentId:String, key:String, parser:ICharacterParser, strings:Dynamic):Void{
 		
 	}
 
